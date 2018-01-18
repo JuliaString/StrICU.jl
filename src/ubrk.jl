@@ -181,7 +181,7 @@ const UBrkType = Int32
     Line Breaking Properties.  These are available at http://www.unicode.org/reports/tr14/
     and http://www.unicode.org/reports/tr29/.
 """
-struct UBrk
+mutable struct UBrk
     p::Ptr{Void}
     s
     r
