@@ -18,7 +18,7 @@ export UDAT, UDateFormat
 
 macro libdat(s)     ; _libicu(s, iculibi18n, "udat_")     ; end
 
-struct UDateFormat
+mutable struct UDateFormat
     ptr::Ptr{Void}
 
     UDateFormat(tstyle::Integer, dstyle::Integer, tz::UniStr) =

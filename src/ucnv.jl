@@ -11,7 +11,7 @@ macro libcnv(s)     ; _libicu(s, iculibi18n, "ucnv_")     ; end
 
 export UConverter
 
-struct UConverter
+mutable struct UConverter
     p::Ptr{Void}
 
     function UConverter(name::ASCIIStr)

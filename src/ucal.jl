@@ -48,7 +48,7 @@ const UDate = Float64
 macro libcal(s)     ; _libicu(s, iculibi18n, "ucal_")     ; end
 
 export UCalendar
-struct UCalendar
+mutable struct UCalendar
     ptr::Ptr{Void}
 
     UCalendar(tz::UTF16Str) = UCalendar(Vector{UInt16}(tz))

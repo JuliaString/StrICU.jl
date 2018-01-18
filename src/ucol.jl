@@ -24,7 +24,7 @@ module ucol end
 
 macro libcol(s)     ; _libicu(s, iculibi18n, "ucol_")     ; end
 
-struct UCollator
+mutable struct UCollator
     p::Ptr{Void}
 
     UCollator() = new(C_NULL)

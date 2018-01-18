@@ -9,7 +9,7 @@ module utext end
 
 macro libtext(s)    ; _libicu(s, iculib,     "utext_")    ; end
 
-struct UText
+mutable struct UText
     p::Ptr{Void}
     s
 

@@ -25,7 +25,7 @@ export UCharsetDetector
 
 const _empty_vec8 = UInt8[]
 
-struct UCharsetDetector
+mutable struct UCharsetDetector
     p::Ptr{Void}
     s::Vector{UInt8}
 
