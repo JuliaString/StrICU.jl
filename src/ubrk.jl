@@ -182,29 +182,29 @@ const UBrkType = Int32
     and http://www.unicode.org/reports/tr29/.
 """
 mutable struct UBrk
-    p::Ptr{Void}
+    p::Ptr{Cvoid}
     s
     r
 
     function UBrk(kind::Integer, s::Vector{UInt16}, loc::ASCIIStr)
         err = UErrorCode[0]
-        p = ccall(@libbrk(open), Ptr{Void},
+        p = ccall(@libbrk(open), Ptr{Cvoid},
                   (UBrkType, Cstring, Ptr{UChar}, Int32, Ptr{UErrorCode}),
                   kind, loc, s, length(s), err)
         @assert SUCCESS(err[1])
         # Retain pointer to input vector, otherwise it might be GCed
-        self = new(p, s, Void())
+        self = new(p, s, Cvoid())
         finalizer(self, close)
         self
     end
     function UBrk(kind::Integer, s::Vector{UInt16})
         err = UErrorCode[0]
-        p = ccall(@libbrk(open), Ptr{Void},
+        p = ccall(@libbrk(open), Ptr{Cvoid},
                   (UBrkType, Ptr{UInt8}, Ptr{UChar}, Int32, Ptr{UErrorCode}),
                   kind, C_NULL, s, length(s), err)
         @assert SUCCESS(err[1])
         # Retain pointer to input vector, otherwise it might be GCed
-        self = new(p, s, Void())
+        self = new(p, s, Cvoid())
         finalizer(self, close)
         self
     end
@@ -212,7 +212,7 @@ mutable struct UBrk
         err = UErrorCode[0]
         # Temporary disable UParseError and pass C_NULL
         #p_err = Ref(UParseError())
-        p = ccall(@libbrk(openRules), Ptr{Void},
+        p = ccall(@libbrk(openRules), Ptr{Cvoid},
                   (Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{UParseError}, Ptr{UErrorCode}),
                   rules, length(rules), s, length(s), C_NULL, err)
         @assert SUCCESS(err[1])
@@ -223,18 +223,18 @@ mutable struct UBrk
     end
 end
 UBrk(kind::Integer, s::UTF16Str) =
-    UBrk(kind, Vector{UInt16}(s)[1:end-1])
+    UBrk(kind, codeunits(s))
 UBrk(kind::Integer, s::UTF16Str, loc::AbstractString) =
-    UBrk(kind, Vector{UInt16}(s)[1:end-1], cvt_ascii(loc))
+    UBrk(kind, codeunits(s), cvt_ascii(loc))
 UBrk(rules::UTF16Str, s::UTF16Str) =
-    UBrk(Vector{UInt16}(rules)[1:end-1], Vector{UInt16}(s)[1:end-1])
+    UBrk(codeunits(rules), codeunits(s))
 
 """
     Close the Break Iterator and return any resource, if not already closed
 """
 close(bi::UBrk) =
     bi.p == C_NULL ||
-        (ccall(@libbrk(close), Void, (Ptr{Void},), bi.p) ; bi.p = C_NULL ; bi.s = Void() ; bi.r = Void())
+        (ccall(@libbrk(close), Cvoid, (Ptr{Cvoid},), bi.p) ; bi.p = C_NULL ; bi.s = Cvoid() ; bi.r = Cvoid())
 
 """
     Determine the most recently-returned text boundary.
@@ -243,27 +243,27 @@ close(bi::UBrk) =
     bi - The break iterator to use.
     Returns the character index most recently returned by next, previous, first, or last.
 """
-current(bi::UBrk) = ccall(@libbrk(current), Int32, (Ptr{Void},), bi.p)
+current(bi::UBrk) = ccall(@libbrk(current), Int32, (Ptr{Cvoid},), bi.p)
 
 """
     Advance the iterator to the boundary following the current boundary.
     Returns the character index of the next text boundary, or UBRK.DONE
     if all text boundaries have been returned.
 """
-next(bi::UBrk) = ccall(@libbrk(next), Int32, (Ptr{Void},), bi.p)
+next(bi::UBrk) = ccall(@libbrk(next), Int32, (Ptr{Cvoid},), bi.p)
 
 """
     Set the iterator position to the boundary preceding the current boundary.
     Returns the character index of the preceding text boundary, or UBRK.DONE
     if all text boundaries have been returned.
 """
-previous(bi::UBrk) = ccall(@libbrk(previous), Int32, (Ptr{Void},), bi.p)
+previous(bi::UBrk) = ccall(@libbrk(previous), Int32, (Ptr{Cvoid},), bi.p)
 
 """
     Set the iterator position to zero, the start of the text being scanned.
     Returns the new iterator position (zero).
 """
-first(bi::UBrk) = ccall(@libbrk(first), Int32, (Ptr{Void},), bi.p)
+first(bi::UBrk) = ccall(@libbrk(first), Int32, (Ptr{Cvoid},), bi.p)
 
 """
     Set the iterator position to the index immediately <EM>beyond</EM> the last character in
@@ -272,7 +272,7 @@ first(bi::UBrk) = ccall(@libbrk(first), Int32, (Ptr{Void},), bi.p)
     Returns the character offset immediately <EM>beyond</EM> the last character in the
     text being scanned.
 """
-last(bi::UBrk) = ccall(@libbrk(last), Int32, (Ptr{Void},), bi.p)
+last(bi::UBrk) = ccall(@libbrk(last), Int32, (Ptr{Cvoid},), bi.p)
 
 """
     Set the iterator position to the first boundary preceding the specified offset.
@@ -283,7 +283,7 @@ last(bi::UBrk) = ccall(@libbrk(last), Int32, (Ptr{Void},), bi.p)
     offset - The offset to begin scanning.
     Returns the text boundary preceding offset, or UBRK.DONE
 """
-preceding(bi::UBrk, off) = ccall(@libbrk(preceding), Int32, (Ptr{Void}, Int32), bi.p, off)
+preceding(bi::UBrk, off) = ccall(@libbrk(preceding), Int32, (Ptr{Cvoid}, Int32), bi.p, off)
 
 """
     Advance the iterator to the first boundary following the specified offset.
@@ -294,7 +294,7 @@ preceding(bi::UBrk, off) = ccall(@libbrk(preceding), Int32, (Ptr{Void}, Int32), 
     - offset - The offset to begin scanning.
     Returns the text boundary following offset, or UBRK.DONE
 """
-following(bi::UBrk, off) = ccall(@libbrk(following), Int32, (Ptr{Void}, Int32), bi.p, off)
+following(bi::UBrk, off) = ccall(@libbrk(following), Int32, (Ptr{Cvoid}, Int32), bi.p, off)
 
 """
     Get a locale for which text breaking information is available.
@@ -331,7 +331,7 @@ count_available() = ccall(@libbrk(countAvailable), Int32, ())
 
     Returns true if "offset" is a boundary position.
 """
-isboundary(bi::UBrk, off) = ccall(@libbrk(isBoundary), Int32, (Ptr{Void}, Int32), bi.p, off) != 0
+isboundary(bi::UBrk, off) = ccall(@libbrk(isBoundary), Int32, (Ptr{Cvoid}, Int32), bi.p, off) != 0
 
 """
     Return the status from the break rule that determined the most recently returned break
@@ -339,7 +339,7 @@ isboundary(bi::UBrk, off) = ccall(@libbrk(isBoundary), Int32, (Ptr{Void}, Int32)
     For rules that do not specify a status, a default value of 0 is returned.
 """
 get_rule_status(bi::UBrk) =
-    ccall(@libbrk(getRuleStatus), Int32, (Ptr{Void},), bi.p)
+    ccall(@libbrk(getRuleStatus), Int32, (Ptr{Cvoid},), bi.p)
 
 """
     Get the statuses from the break rules that determined the most recently
@@ -363,7 +363,7 @@ get_rule_status(bi::UBrk) =
 function get_rule_status_vec(bi::UBrk, fillinvec::Vector{Int32})
     err = UErrorCode[0]
     cnt = ccall(@libbrk(getRuleStatusVec), Int32,
-                (Ptr{Void}, Ptr{Int32}, Int32,  Ptr{UErrorCode}),
+                (Ptr{Cvoid}, Ptr{Int32}, Int32,  Ptr{UErrorCode}),
                 bi.p, fillinvec, length(fillinvec), err)
     @assert SUCCESS(err[1])
     cnt
@@ -372,7 +372,7 @@ end
 function get_rule_status_len(bi::UBrk)
     err = UErrorCode[0]
     cnt = ccall(@libbrk(getRuleStatusVec), Int32,
-                (Ptr{Void}, Ptr{Int32}, Int32,  Ptr{UErrorCode}),
+                (Ptr{Cvoid}, Ptr{Int32}, Int32,  Ptr{UErrorCode}),
                 bi.p, C_NULL, 0, err)
     @assert SUCCESS(err[1])
     cnt
@@ -410,9 +410,9 @@ set!(bi::UBrk, str::UTF16Str) = set!(bi, Vector{UInt16}(str))
 
 function set!(bi::UBrk, v::Vector{UInt16})
     err = UErrorCode[0]
-    ccall(@libbrk(setText), Void,
-          (Ptr{Void}, Ptr{UChar}, Int32, Ptr{UErrorCode}),
-          bi.p, v, length(v)-1, err)
+    ccall(@libbrk(setText), Cvoid,
+          (Ptr{Cvoid}, Ptr{UChar}, Int32, Ptr{UErrorCode}),
+          bi.p, v, length(v), err)
     # Retain pointer so that it won't be GCed
     bi.s = v
     @assert SUCCESS(err[1])
@@ -439,8 +439,8 @@ end
 """
 function set!(bi::UBrk, t::UText)
     err = UErrorCode[0]
-    ccall(@libbrk(setUText), Void,
-          (Ptr{Void}, Ptr{Void}, Ptr{UErrorCode}),
+    ccall(@libbrk(setUText), Cvoid,
+          (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{UErrorCode}),
           bi.p, t.p, err)
     @assert SUCCESS(err[1])
     err[1]

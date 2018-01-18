@@ -9,6 +9,7 @@
 module StrICU
 
 @static VERSION < v"0.7.0-DEV" || (const is_windows = Sys.iswindows)
+@static VERSION < v"0.7.0-DEV" && (const Cvoid = Void)
 
 import Base: parse, get, close
 

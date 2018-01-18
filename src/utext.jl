@@ -10,14 +10,14 @@ module utext end
 macro libtext(s)    ; _libicu(s, iculib,     "utext_")    ; end
 
 mutable struct UText
-    p::Ptr{Void}
+    p::Ptr{Cvoid}
     s
 
     function UText(str::ByteStr)
         err = UErrorCode[0]
         v = convert(UTF8Str, str)
-        p = ccall(@libtext(openUTF8), Ptr{Void},
-                  (Ptr{Void}, Ptr{UInt8}, Int64, Ptr{UErrorCode}),
+        p = ccall(@libtext(openUTF8), Ptr{Cvoid},
+                  (Ptr{Cvoid}, Ptr{UInt8}, Int64, Ptr{UErrorCode}),
                   C_NULL, v, sizeof(v), err)
         @assert SUCCESS(err[1])
         # Retain pointer to data so that it won't be GCed
@@ -28,8 +28,8 @@ mutable struct UText
 
     function UText(str::UTF16Str)
         err = UErrorCode[0]
-        p = ccall(@libtext(openUChars), Ptr{Void},
-                  (Ptr{Void}, Ptr{UChar}, Int64, Ptr{UErrorCode}),
+        p = ccall(@libtext(openUChars), Ptr{Cvoid},
+                  (Ptr{Cvoid}, Ptr{UChar}, Int64, Ptr{UErrorCode}),
                   C_NULL, pointer(str), ncodeunits(str), err)
         @assert SUCCESS(err[1])
         # Retain pointer to data so that it won't be GCed
@@ -41,4 +41,4 @@ end
 
 close(t::UText) =
     t.p == C_NULL ||
-        (ccall(@libtext(close), Void, (Ptr{Void},), t.p) ; t.p = C_NULL ; t.s = Void())
+        (ccall(@libtext(close), Cvoid, (Ptr{Cvoid},), t.p) ; t.p = C_NULL ; t.s = Cvoid())

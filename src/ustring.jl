@@ -52,22 +52,22 @@ macro libstr(s)     ; _libicu(s, iculib,     "u_str")     ; end
 _tolower(dest::Vector{UInt16}, destsiz, src, err) =
     ccall(@libstr(ToLower), Int32,
           (Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{UInt8}, Ptr{UErrorCode}),
-          dest, destsiz, src, length(src)-1, locale[], err)
+          dest, destsiz, src, length(src), locale[], err)
 
 _toupper(dest::Vector{UInt16}, destsiz, src, err) =
     ccall(@libstr(ToUpper), Int32,
           (Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{UInt8}, Ptr{UErrorCode}),
-          dest, destsiz, src, length(src)-1, locale[], err)
+          dest, destsiz, src, length(src), locale[], err)
 
 _foldcase(dest::Vector{UInt16}, destsiz, src, err) =
     ccall(@libstr(FoldCase), Int32,
           (Ptr{UChar}, Int32, Ptr{UChar}, Int32, UInt32, Ptr{UErrorCode}),
-          dest, destsiz, src, length(src)-1, 0, err)
+          dest, destsiz, src, length(src), 0, err)
 
 _totitle(dest::Vector{UInt16}, destsiz, src, breakiter, err) =
     ccall(@libstr(ToTitle), Int32,
-          (Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{Void}, Ptr{UInt8}, Ptr{UErrorCode}),
-          dest, destsiz, src, length(src)-1, breakiter, locale[], err)
+          (Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{Cvoid}, Ptr{UInt8}, Ptr{UErrorCode}),
+          dest, destsiz, src, length(src), breakiter, locale[], err)
 
 """
    Case-folds the characters in a string.

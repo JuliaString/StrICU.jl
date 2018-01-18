@@ -14,7 +14,7 @@ module ucasemap end
 
 macro libcasemap(s) ; _libicu(s, iculib,     "ucasemap_") ; end
 
-const casemap  = Ptr{Void}[C_NULL]
+const casemap  = Ptr{Cvoid}[C_NULL]
 const collator = [UCollator()]
 
 for f in (:ToLower, :ToUpper, :FoldCase, :ToTitle)
@@ -24,7 +24,7 @@ for f in (:ToLower, :ToUpper, :FoldCase, :ToTitle)
     @eval begin
         ($uf)(dest::Vector{UInt8}, destsiz, src, err) =
             ccall(@libcasemap($ff), Int32,
-                  (Ptr{Void}, Ptr{UInt8}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
+                  (Ptr{Cvoid}, Ptr{UInt8}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
                   casemap[], dest, destsiz, src, sizeof(src), err)
         function ($lf)(s::ByteStr)
             src = Vector{UInt8}(s)
@@ -45,19 +45,19 @@ for f in (:ToLower, :ToUpper, :FoldCase, :ToTitle)
     end
 end
 
-get_break_iterator() = ccall(@libcasemap(getBreakIterator), Ptr{Void}, (Ptr{Void},), casemap[])
+get_break_iterator() = ccall(@libcasemap(getBreakIterator), Ptr{Cvoid}, (Ptr{Cvoid},), casemap[])
 
 function set_locale!(loc::ASCIIStr)
     if casemap[] != C_NULL
-        ccall(@libcasemap(close), Void, (Ptr{Void},), casemap[])
+        ccall(@libcasemap(close), Cvoid, (Ptr{Cvoid},), casemap[])
         casemap[] = C_NULL
     end
     collator[] = UCollator(loc)
     err = UErrorCode[0]
     casemap[] = (loc == ""
-                 ? ccall(@libcasemap(open), Ptr{Void}, (Ptr{UInt8}, Int32, Ptr{UErrorCode}),
+                 ? ccall(@libcasemap(open), Ptr{Cvoid}, (Ptr{UInt8}, Int32, Ptr{UErrorCode}),
                          C_NULL, 0, err)
-                 : ccall(@libcasemap(open), Ptr{Void}, (Cstring, Int32, Ptr{UErrorCode}),
+                 : ccall(@libcasemap(open), Ptr{Cvoid}, (Cstring, Int32, Ptr{UErrorCode}),
                          loc, 0, err))
     FAILURE(err[1]) && error("could not set casemap")
     locale[] = loc

@@ -12,11 +12,11 @@ macro libcnv(s)     ; _libicu(s, iculibi18n, "ucnv_")     ; end
 export UConverter
 
 mutable struct UConverter
-    p::Ptr{Void}
+    p::Ptr{Cvoid}
 
     function UConverter(name::ASCIIStr)
         err = UErrorCode[0]
-        p = ccall(@libcnv(open), Ptr{Void}, (Cstring, Ptr{UErrorCode}), name, err)
+        p = ccall(@libcnv(open), Ptr{Cvoid}, (Cstring, Ptr{UErrorCode}), name, err)
         SUCCESS(err[1]) || error("ICU: could not open converter ", name)
         self = new(p)
         finalizer(self, close)
@@ -25,7 +25,7 @@ mutable struct UConverter
 end
 
 close(c::UConverter) =
-    c.p == C_NULL || (ccall(@libcnv(close), Void, (Ptr{Void},), c.p); c.p = C_NULL)
+    c.p == C_NULL || (ccall(@libcnv(close), Cvoid, (Ptr{Cvoid},), c.p); c.p = C_NULL)
 
 struct UConverterPivot
     buf::Vector{UCS2Chr}
@@ -45,8 +45,8 @@ function convert!(dstcnv::UConverter, srccnv::UConverter,
                    pointer(src.data, position(src)+1)]
     p0 = copy(p)
     err = UErrorCode[0]
-    ccall(@libcnv(convertEx), Void,
-          (Ptr{Void}, Ptr{Void},
+    ccall(@libcnv(convertEx), Cvoid,
+          (Ptr{Cvoid}, Ptr{Cvoid},
            Ptr{Ptr{UInt8}}, Ptr{UInt8}, Ptr{Ptr{UInt8}}, Ptr{UInt8},
            Ptr{UCS2Chr}, Ptr{Ptr{UCS2Chr}}, Ptr{Ptr{UCS2Chr}}, Ptr{UCS2Chr},
            UBool, UBool, Ptr{UErrorCode}),
@@ -70,7 +70,7 @@ function to_uchars(cnv::UConverter, b::Vector{UInt8})
     u = zeros(UCS2Chr, 2*length(b)+1)
     err = UErrorCode[0]
     n = ccall(@libcnv(toUChars), Int32,
-              (Ptr{Void}, Ptr{UCS2Chr}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
+              (Ptr{Cvoid}, Ptr{UCS2Chr}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
               cnv.p, u, length(u), b, length(b), err)
     SUCCESS(err[1]) || error("ICU: could not convert string")
     UTF16Str(u[1:n])
@@ -86,7 +86,7 @@ end
 """
 function isambiguous(cnv::UConverter)
     err = UErrorCode[0]
-    v = ccall(@libcnv(isAmbiguous), Bool, (Ptr{Void}, Ptr{UErrorCode}), cnv.p, err)
+    v = ccall(@libcnv(isAmbiguous), Bool, (Ptr{Cvoid}, Ptr{UErrorCode}), cnv.p, err)
     SUCCESS(err[1]) || error("ICU: internal error in ucnv_isFixedWidth")
     v
 end
@@ -135,7 +135,7 @@ end
 """
 function from_ucount_pending(cnv::UConverter)
     err = UErrorCode[0]
-    v = ccall(@libcnv(toUCountPending), Int32, (Ptr{Void}, Ptr{UErrorCode}), cnv.p, err)
+    v = ccall(@libcnv(toUCountPending), Int32, (Ptr{Cvoid}, Ptr{UErrorCode}), cnv.p, err)
     SUCCESS(err[1]) || error("ICU: internal error in ucnv_fromUCountPending")
     v
 end
@@ -153,7 +153,7 @@ end
 """
 function to_ucount_pending(cnv::UConverter)
     err = UErrorCode[0]
-    v = ccall(@libcnv(toUCountPending), Int32, (Ptr{Void}, Ptr{UErrorCode}), cnv.p, err)
+    v = ccall(@libcnv(toUCountPending), Int32, (Ptr{Cvoid}, Ptr{UErrorCode}), cnv.p, err)
     SUCCESS(err[1]) || error("ICU: internal error in ucnv_toUCountPending")
     v
 end
@@ -177,7 +177,7 @@ end
 """
 function is_fixed_width(cnv::UConverter)
     err = UErrorCode[0]
-    v = ccall(@libcnv(isFixedWidth), Bool, (Ptr{Void}, Ptr{UErrorCode}), cnv.p, err)
+    v = ccall(@libcnv(isFixedWidth), Bool, (Ptr{Cvoid}, Ptr{UErrorCode}), cnv.p, err)
     SUCCESS(err[1]) || error("ICU: internal error in ucnv_isFixedWidth")
     v
 end
