@@ -25,7 +25,7 @@ module ucol end
 macro libcol(s)     ; _libicu(s, iculibi18n, "ucol_")     ; end
 
 mutable struct UCollator
-    p::Ptr{Void}
+    p::Ptr{Cvoid}
 
     UCollator() = new(C_NULL)
     function UCollator(loc)
@@ -39,15 +39,15 @@ end
 function _ucol_open(loc::ASCIIStr)
     err = UErrorCode[0]
     p = (loc == ""
-         ? ccall(@libcol(open), Ptr{Void}, (Ptr{UInt8}, Ptr{UErrorCode}), C_NULL, err)
-         : ccall(@libcol(open), Ptr{Void}, (Cstring, Ptr{UErrorCode}), loc, err))
+         ? ccall(@libcol(open), Ptr{Cvoid}, (Ptr{UInt8}, Ptr{UErrorCode}), C_NULL, err)
+         : ccall(@libcol(open), Ptr{Cvoid}, (Cstring, Ptr{UErrorCode}), loc, err))
     SUCCESS(err[1]) || error("ICU: could not open collator for locale ", loc)
     p
 end
 _ucol_open(loc::AbstractString) = _ucol_open(ASCIIStr(loc))
 
 close(c::UCollator) =
-    c.p == C_NULL || (ccall(@libcol(close), Void, (Ptr{Void},), c.p) ; c.p = C_NULL)
+    c.p == C_NULL || (ccall(@libcol(close), Cvoid, (Ptr{Cvoid},), c.p) ; c.p = C_NULL)
 
 """
    strcoll(c::UCollator, a, b)
@@ -69,7 +69,7 @@ strcoll(c::UCollator, a::ByteStr, b::ByteStr) = strcoll(c, Vector{UInt8}(a), Vec
 function strcoll(c::UCollator, a::Vector{UInt8}, b::Vector{UInt8})
     err = UErrorCode[0]
     o = ccall(@libcol(strcollUTF8), Int32,
-              (Ptr{Void}, Ptr{UInt8}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
+              (Ptr{Cvoid}, Ptr{UInt8}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
               c.p, a, sizeof(a), b, sizeof(b), err)
     @assert SUCCESS(err[1])
     o
@@ -79,8 +79,8 @@ strcoll(c::UCollator, a::UniStr, b::UniStr) = strcoll(c, Vector{UInt16}(a), Vect
 function strcoll(c::UCollator, a::Vector{UInt16}, b::Vector{UInt16})
     err = UErrorCode[0]
     o = ccall(@libcol(strcoll), Int32,
-              (Ptr{Void}, Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{UErrorCode}),
-              c.p, a, length(a)-1, b, length(b)-1, err)
+              (Ptr{Cvoid}, Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{UErrorCode}),
+              c.p, a, length(a), b, length(b), err)
     @assert SUCCESS(err[1])
     o
 end

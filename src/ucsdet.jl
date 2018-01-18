@@ -26,12 +26,12 @@ export UCharsetDetector
 const _empty_vec8 = UInt8[]
 
 mutable struct UCharsetDetector
-    p::Ptr{Void}
+    p::Ptr{Cvoid}
     s::Vector{UInt8}
 
     function UCharsetDetector()
         err = UErrorCode[0]
-        p = ccall(@libucsdet(open), Ptr{Void}, (Ptr{UErrorCode},), err)
+        p = ccall(@libucsdet(open), Ptr{Cvoid}, (Ptr{UErrorCode},), err)
         SUCCESS(err[1]) || error("ICU: could not open charset detector")
         self = new(p, _empty_vec8)
         finalizer(self, close)
@@ -39,7 +39,7 @@ mutable struct UCharsetDetector
     end
 end
 close(c::UCharsetDetector) =
-    c.p == C_NULL || (ccall(@libucsdet(close), Void, (Ptr{Void},), c.p); c.p = C_NULL)
+    c.p == C_NULL || (ccall(@libucsdet(close), Cvoid, (Ptr{Cvoid},), c.p); c.p = C_NULL)
 
 """
    Set the input byte data whose charset is to detected.
@@ -56,7 +56,7 @@ set!(csd::UCharsetDetector, s::AbstractString) = set!(csd, Vector{UInt8}(s))
 function set!(csd::UCharsetDetector, s::Vector{UInt8})
     csd.s = s
     err = UErrorCode[0]
-    ccall(@libucsdet(setText), Void, (Ptr{Void},Ptr{UInt8},Int32,Ptr{UErrorCode}), csd.p, s, length(s), err)
+    ccall(@libucsdet(setText), Cvoid, (Ptr{Cvoid},Ptr{UInt8},Int32,Ptr{UErrorCode}), csd.p, s, length(s), err)
     SUCCESS(err[1]) || error("ICU: could not set charset detector text")
     nothing
 end
@@ -76,7 +76,7 @@ end
 set_declared_encoding!(csd::UCharsetDetector, s::AbstractString) = set_declared_encoding(csd, Vector{UInt8}(s))
 function set_declared_encoding!(csd::UCharsetDetector, s::Vector{UInt8})
     err = UErrorCode[0]
-    ccall(@libucsdet(setDeclaredEnocding), Void, (Ptr{Void},Ptr{UInt8},Int32,Ptr{UErrorCode}), csd.p, s, sizeof(s), err)
+    ccall(@libucsdet(setDeclaredEnocding), Cvoid, (Ptr{Cvoid},Ptr{UInt8},Int32,Ptr{UErrorCode}), csd.p, s, sizeof(s), err)
     SUCCESS(err[1]) || error("ICU: could not set charset detector declared encoding")
     nothing
 end
@@ -85,7 +85,7 @@ end
    Opaque structure representing a match that was identified from a charset detection operation.
 """
 type UCharsetMatch
-    p::Ptr{Void}
+    p::Ptr{Cvoid}
     # This is needed to keep the UCharsetDetector from being GCed until after all dependent UCharsetMatch's are GCed
     ucd::UCharsetDetector
 end
@@ -113,7 +113,7 @@ end
 """
 function detect(csd::UCharsetDetector)
     err = UErrorCode[0]
-    p = ccall(@libucsdet(detect), Ptr{Void}, (Ptr{Void},Ptr{UErrorCode}), csd.p, err)
+    p = ccall(@libucsdet(detect), Ptr{Cvoid}, (Ptr{Cvoid},Ptr{UErrorCode}), csd.p, err)
     SUCCESS(err[1]) || error("ICU: could not detect encoding")
     p != C_NULL ? UCharsetMatch(p, csd) : nothing
 end
@@ -148,7 +148,7 @@ end
 function detectall(csd::UCharsetDetector)
     err = UErrorCode[0]
     n = Int32[0]
-    p = ccall(@libucsdet(detectAll), Ptr{Ptr{Void}}, (Ptr{Void},Ptr{Int32},Ptr{UErrorCode}), csd.p, n, err)
+    p = ccall(@libucsdet(detectAll), Ptr{Ptr{Cvoid}}, (Ptr{Cvoid},Ptr{Int32},Ptr{UErrorCode}), csd.p, n, err)
     SUCCESS(err[1]) || error("ICU: could not detect encoding")
     n[1] > 0 || return Vector{UCharsetMatch}()
 
@@ -172,7 +172,7 @@ end
 function get_name(csmatch::UCharsetMatch)
     csmatch.p != C_NULL || throw(UndefRefError())
     err = UErrorCode[0]
-    name = ccall(@libucsdet(getName), Ptr{UInt8}, (Ptr{Void},Ptr{UErrorCode}), csmatch.p, err)
+    name = ccall(@libucsdet(getName), Ptr{UInt8}, (Ptr{Cvoid},Ptr{UErrorCode}), csmatch.p, err)
     SUCCESS(err[1]) || error("ICU: could not get name of matching encoding")
     unsafe_string(name)
 end
@@ -199,7 +199,7 @@ end
 function get_confidence(csmatch::UCharsetMatch)
     csmatch.p != C_NULL || throw(UndefRefError())
     err = UErrorCode[0]
-    confidence = ccall(@libucsdet(getConfidence), Int32, (Ptr{Void},Ptr{UErrorCode}), csmatch.p, err)
+    confidence = ccall(@libucsdet(getConfidence), Int32, (Ptr{Cvoid},Ptr{UErrorCode}), csmatch.p, err)
     SUCCESS(err[1]) || error("ICU: could not get confidence")
     Int(confidence)
 end
@@ -231,7 +231,7 @@ end
 function get_language(csmatch::UCharsetMatch)
     csmatch.p != C_NULL || throw(UndefRefError())
     err = UErrorCode[0]
-    p = ccall(@libucsdet(getLanguage), Ptr{UInt8}, (Ptr{Void},Ptr{UErrorCode}), csmatch.p, err)
+    p = ccall(@libucsdet(getLanguage), Ptr{UInt8}, (Ptr{Cvoid},Ptr{UErrorCode}), csmatch.p, err)
     SUCCESS(err[1]) || error("ICU: could not get language")
     unsafe_string(p)
 end
@@ -264,8 +264,8 @@ function get_uchars(csmatch::UCharsetMatch)
     UTF16Str(dest[1:len])
 end
 
-_get_uchars(p::Ptr{Void}, buf, siz, err) =
-    ccall(@libucsdet(getUChars), Int32, (Ptr{Void},Ptr{UInt8},Int32,Ptr{UErrorCode}), p, buf, siz, err)
+_get_uchars(p::Ptr{Cvoid}, buf, siz, err) =
+    ccall(@libucsdet(getUChars), Int32, (Ptr{Cvoid},Ptr{UInt8},Int32,Ptr{UErrorCode}), p, buf, siz, err)
 
 """
    Get an iterator over the set of all detectable charsets -
@@ -290,7 +290,7 @@ _get_uchars(p::Ptr{Void}, buf, siz, err) =
 function get_all_detectable_charsets(csd::UCharsetDetector)
     csd.p != C_NULL || throw(UndefRefError())
     err = UErrorCode[0]
-    p = ccall(@libucsdet(getAllDetectableCharsets), Ptr{Void}, (Ptr{Void}, Ptr{UErrorCode}), csd.p, err)
+    p = ccall(@libucsdet(getAllDetectableCharsets), Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{UErrorCode}), csd.p, err)
     SUCCESS(err[1]) || error("ICU: could not get all detected charsetsa")
     p
 end
@@ -307,7 +307,7 @@ end
     Returns: TRUE if filtering is enabled.
 """
 input_filter_enabled(csd::UCharsetDetector) =
-    ccall(@libucsdet(isInputFilterEnabled), UBool, (Ptr{Void},), csd.p)
+    ccall(@libucsdet(isInputFilterEnabled), UBool, (Ptr{Cvoid},), csd.p)
 
 """
    Enable filtering of input text. If filtering is enabled, text within angle brackets ("<" and ">") will be removed
@@ -320,4 +320,4 @@ input_filter_enabled(csd::UCharsetDetector) =
    Returns: The previous setting.
 """
 enable_input_filter(csd::UCharsetDetector, filter::Bool=true) =
-    ccall(@libucsdet(enableInputFilter), UBool, (Ptr{Void},Bool), csd.p, filter)
+    ccall(@libucsdet(enableInputFilter), UBool, (Ptr{Cvoid},Bool), csd.p, filter)
