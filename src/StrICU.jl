@@ -12,7 +12,7 @@ module StrICU
     const Cvoid = Void
 else
     const is_windows = Sys.iswindows
-    finalizer(o, f::Function) = finalizer(f, o)
+    finalizer(o, f::Function) = Base.finalizer(f, o)
 end
 
 import Base: parse, get, close
