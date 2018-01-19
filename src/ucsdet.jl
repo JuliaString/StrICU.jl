@@ -84,7 +84,7 @@ end
 """
    Opaque structure representing a match that was identified from a charset detection operation.
 """
-type UCharsetMatch
+mutable struct UCharsetMatch
     p::Ptr{Cvoid}
     # This is needed to keep the UCharsetDetector from being GCed until after all dependent UCharsetMatch's are GCed
     ucd::UCharsetDetector
