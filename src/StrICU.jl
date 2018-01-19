@@ -8,8 +8,12 @@
 """
 module StrICU
 
-@static VERSION < v"0.7.0-DEV" || (const is_windows = Sys.iswindows)
-@static VERSION < v"0.7.0-DEV" && (const Cvoid = Void)
+@static if VERSION < v"0.7.0-DEV"
+    const Cvoid = Void
+else
+    const is_windows = Sys.iswindows
+    finalizer(o, f::Function) = finalizer(f, o)
+end
 
 import Base: parse, get, close
 
