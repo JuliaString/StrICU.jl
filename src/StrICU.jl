@@ -19,6 +19,10 @@ import Base: parse, get, close
 
 using Strs
 
+const cvt_utf8 = Strs.utf8
+const cvt_utf16 = Strs.utf16
+export cvt_utf8, cvt_utf16
+
 const ByteStr   = Union{ASCIIStr, UTF8Str, String}
 
 export set_locale!
