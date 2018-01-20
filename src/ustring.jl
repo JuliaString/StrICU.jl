@@ -93,12 +93,12 @@ for f in (:tolower, :toupper, :foldcase)
             srclen = ncodeunits(str)
             dest, pnt = Strs._allocate(UInt16, srclen)
             err = UErrorCode[0]
-            destsiz = ($uf)(dest, srclen, src, srclen, err)
+            destsiz = ($uf)(dest, srclen, Strs._pnt(str), srclen, err)
             destsiz != srclen && resize!(dest, destsiz)
             # Retry with large enough buffer if got buffer overflow
             if err[1] == U_BUFFER_OVERFLOW_ERROR
                 err[1] = 0
-                destsiz = ($uf)(dest, destsiz, src, srclen, err)
+                ($uf)(dest, destsiz, Strs._pnt(str), srclen, err)
             end
             FAILURE(err[1]) && error("failed to map case")
             Str(cse(T), dest)
@@ -133,15 +133,15 @@ end
 function totitle end
 
 function totitle(str::T, bi) where {T<:Union{UCS2Str, UTF16Str}}
-    srclen = ncodeunits(src)
+    srclen = ncodeunits(str)
     dest, pnt = Strs._allocate(UInt16, len)
     err = UErrorCode[0]
-    dstlen = _totitle(pnt, srclen, src, srclen, bi, err)
-    dstlen != srclen && resize!(dest, srclen)
+    dstlen = _totitle(pnt, srclen, Strs._pnt(src), srclen, bi, err)
+    dstlen != srclen && resize!(dest, dstlen)
     # Retry with large enough buffer if got buffer overflow
     if err[1] == U_BUFFER_OVERFLOW_ERROR
         err[1] = 0
-        len = _totitle(dest, dstlen, src, srclen, bi, err)
+        _totitle(dest, dstlen, Strs._pnt(src), srclen, bi, err)
     end
     FAILURE(err[1]) && error("failed to map case")
     Str(cse(T), dest)
