@@ -19,6 +19,9 @@ import Base: parse, get, close
 
 using Strs
 
+export ICU
+const ICU = StrICU
+
 const cvt_utf8 = Strs.utf8
 const cvt_utf16 = Strs.utf16
 export cvt_utf8, cvt_utf16
@@ -89,4 +92,4 @@ include("udat.jl")
 include("ucal.jl")
 include("ucasemap.jl")
 
-end # module ICU
+end # module StrICU
