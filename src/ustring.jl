@@ -49,25 +49,25 @@ module ustring end
 
 macro libstr(s)     ; _libicu(s, iculib,     "u_str")     ; end
 
-_tolower(dest::Vector{UInt16}, destsiz, src, err) =
-    ccall(@libstr(ToLower), Int32,
-          (Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{UInt8}, Ptr{UErrorCode}),
-          dest, destsiz, src, length(src), locale[], err)
+_tolower(dest, destsiz, src, srclen, err) =
+    ccall(@libstr(ToLower), Cint,
+          (Ptr{UChar}, Cint, Ptr{UChar}, Cint, Ptr{UInt8}, Ptr{UErrorCode}),
+          dest, destsiz, src, srclen, locale[], err)
 
-_toupper(dest::Vector{UInt16}, destsiz, src, err) =
-    ccall(@libstr(ToUpper), Int32,
-          (Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{UInt8}, Ptr{UErrorCode}),
-          dest, destsiz, src, length(src), locale[], err)
+_toupper(dest, destsiz, src, srclen, err) =
+    ccall(@libstr(ToUpper), Cint,
+          (Ptr{UChar}, Cint, Ptr{UChar}, Cint, Ptr{UInt8}, Ptr{UErrorCode}),
+          dest, destsiz, src, srclen, locale[], err)
 
-_foldcase(dest::Vector{UInt16}, destsiz, src, err) =
-    ccall(@libstr(FoldCase), Int32,
-          (Ptr{UChar}, Int32, Ptr{UChar}, Int32, UInt32, Ptr{UErrorCode}),
-          dest, destsiz, src, length(src), 0, err)
+_foldcase(dest, destsiz, src, srclen, err) =
+    ccall(@libstr(FoldCase), Cint,
+          (Ptr{UChar}, Cint, Ptr{UChar}, Cint, UCint, Ptr{UErrorCode}),
+          dest, destsiz, src, srclen, 0, err)
 
-_totitle(dest::Vector{UInt16}, destsiz, src, breakiter, err) =
-    ccall(@libstr(ToTitle), Int32,
-          (Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{Cvoid}, Ptr{UInt8}, Ptr{UErrorCode}),
-          dest, destsiz, src, length(src), breakiter, locale[], err)
+_totitle(dest, destsiz, src, srclen, breakiter, err) =
+    ccall(@libstr(ToTitle), Cint,
+          (Ptr{UChar}, Cint, Ptr{UChar}, Cint, Ptr{Cvoid}, Ptr{UInt8}, Ptr{UErrorCode}),
+          dest, destsiz, src, src, breakiter, locale[], err)
 
 """
    Case-folds the characters in a string.
@@ -89,21 +89,19 @@ function foldcase end
 for f in (:tolower, :toupper, :foldcase)
     uf = Symbol(string('_',f))
     @eval begin
-        function ($f)(s::UTF16Str)
-            src = create_vector(UInt16, s)
-            destsiz = Int32(length(src))
-            dest = zeros(UInt16, destsiz)
+        function ($f)(str::T) where {T<:Union{UCS2Str, UTF16Str}}
+            srclen = ncodeunits(str)
+            dest, pnt = Strs._allocate(UInt16, srclen)
             err = UErrorCode[0]
-            n = ($uf)(dest, destsiz, src, err)
+            destsiz = ($uf)(dest, srclen, src, srclen, err)
+            destsiz != srclen && resize!(dest, destsiz)
             # Retry with large enough buffer if got buffer overflow
             if err[1] == U_BUFFER_OVERFLOW_ERROR
                 err[1] = 0
-                destsiz = n + 1
-                dest = zeros(UInt16, destsiz)
-                n = ($uf)(dest, destsiz, src, err)
+                destsiz = ($uf)(dest, destsiz, src, srclen, err)
             end
             FAILURE(err[1]) && error("failed to map case")
-            convert(UTF16Str, dest[1:n])
+            Str(cse(T), dest)
         end
     end
 end
@@ -134,20 +132,18 @@ end
 """
 function totitle end
 
-function totitle(s::UTF16Str, bi)
-    src = Vector{UInt16}(s)
-    destsiz = Int32(length(src))
-    dest = zeros(UInt16, destsiz)
+function totitle(str::T, bi) where {T<:Union{UCS2Str, UTF16Str}}
+    srclen = ncodeunits(src)
+    dest, pnt = Strs._allocate(UInt16, len)
     err = UErrorCode[0]
-    n = _totitle(dest, destsiz, src, bi, err)
+    dstlen = _totitle(pnt, srclen, src, srclen, bi, err)
+    dstlen != srclen && resize!(dest, srclen)
     # Retry with large enough buffer if got buffer overflow
     if err[1] == U_BUFFER_OVERFLOW_ERROR
         err[1] = 0
-        destsiz = n + 1
-        dest = zeros(UInt16, destsiz)
-        n = _totitle(dest, destsiz, src, bi, err)
+        len = _totitle(dest, dstlen, src, srclen, bi, err)
     end
     FAILURE(err[1]) && error("failed to map case")
-    convert(UTF16Str, dest[1:n])
+    Str(cse(T), dest)
 end
-totitle(s::UTF16Str) = totitle(s, get_break_iterator())
+totitle(str::T) where {T<:Union{UCS2Str, UTF16Str}} = totitle(str, get_break_iterator())
