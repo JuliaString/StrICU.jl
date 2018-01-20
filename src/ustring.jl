@@ -61,7 +61,7 @@ _toupper(dest, destsiz, src, srclen, err) =
 
 _foldcase(dest, destsiz, src, srclen, err) =
     ccall(@libstr(FoldCase), Cint,
-          (Ptr{UChar}, Cint, Ptr{UChar}, Cint, UCint, Ptr{UErrorCode}),
+          (Ptr{UChar}, Cint, Ptr{UChar}, Cint, Cint, Ptr{UErrorCode}),
           dest, destsiz, src, srclen, 0, err)
 
 _totitle(dest, destsiz, src, srclen, breakiter, err) =
