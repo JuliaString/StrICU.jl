@@ -101,7 +101,7 @@ for f in (:tolower, :toupper, :foldcase)
                 ($uf)(dest, destsiz, Strs._pnt(str), srclen, err)
             end
             FAILURE(err[1]) && error("failed to map case")
-            Str(cse(T), dest)
+            Str(Strs.cse(T), dest)
         end
     end
 end
