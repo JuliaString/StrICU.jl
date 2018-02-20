@@ -134,7 +134,7 @@ function totitle end
 
 function totitle(str::T, bi) where {T<:Union{UCS2Str, UTF16Str}}
     srclen = ncodeunits(str)
-    dest, pnt = Strs._allocate(UInt16, len)
+    dest, pnt = Strs._allocate(UInt16, srclen)
     err = UErrorCode[0]
     dstlen = _totitle(pnt, srclen, Strs._pnt(src), srclen, bi, err)
     # Retry with large enough buffer if got buffer overflow
