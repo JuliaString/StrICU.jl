@@ -139,6 +139,8 @@ macro libbrk(s)     ; _libicu(s, iculib,     "ubrk_")     ; end
 
 const UBrkType = Int32
 
+const UBrkStrTypes = Union{Vector{UInt16}, UTF16Str}
+
 """
     UBrk is a type along with methods for finding the location of boundaries in text.
     A UBrk maintains a current position and scan over text returning the index of characters
@@ -186,55 +188,56 @@ mutable struct UBrk
     s
     r
 
-    function UBrk(kind::Integer, s::Vector{UInt16}, loc::ASCIIStr)
+    function UBrk(kind::Integer, str::UBrkStrTypes, loc::ASCIIStr)
         err = UErrorCode[0]
         p = ccall(@libbrk(open), Ptr{Cvoid},
                   (UBrkType, Cstring, Ptr{UChar}, Int32, Ptr{UErrorCode}),
-                  kind, loc, s, length(s), err)
+                  kind, loc, str, length(str), err)
         @assert SUCCESS(err[1])
         # Retain pointer to input vector, otherwise it might be GCed
-        self = new(p, s, Cvoid())
+        self = new(p, str, Cvoid())
         finalizer(self, close)
         self
     end
-    function UBrk(kind::Integer, s::Vector{UInt16})
+    function UBrk(kind::Integer, str::UBrkStrTypes)
         err = UErrorCode[0]
         p = ccall(@libbrk(open), Ptr{Cvoid},
                   (UBrkType, Ptr{UInt8}, Ptr{UChar}, Int32, Ptr{UErrorCode}),
-                  kind, C_NULL, s, length(s), err)
+                  kind, C_NULL, str, length(str), err)
         @assert SUCCESS(err[1])
         # Retain pointer to input vector, otherwise it might be GCed
-        self = new(p, s, Cvoid())
+        self = new(p, str, Cvoid())
         finalizer(self, close)
         self
     end
-    function UBrk(rules::Vector{UInt16}, s::Vector{UInt16})
+    function UBrk(rules::UBrkStrTypes, str::UBrkStrTypes)
         err = UErrorCode[0]
         # Temporary disable UParseError and pass C_NULL
         #p_err = Ref(UParseError())
         p = ccall(@libbrk(openRules), Ptr{Cvoid},
                   (Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{UParseError}, Ptr{UErrorCode}),
-                  rules, length(rules), s, length(s), C_NULL, err)
+                  rules, length(rules), str, length(str), C_NULL, err)
         @assert SUCCESS(err[1])
         # Retain pointer to input vector, otherwise it might be GCed
-        self = new(p, s, rules)
+        self = new(p, str, rules)
         finalizer(self, close)
         self
     end
 end
-UBrk(kind::Integer, s::UTF16Str) =
-    UBrk(kind, codeunits(s))
-UBrk(kind::Integer, s::UTF16Str, loc::AbstractString) =
-    UBrk(kind, codeunits(s), cvt_ascii(loc))
-UBrk(rules::UTF16Str, s::UTF16Str) =
-    UBrk(codeunits(rules), codeunits(s))
+
+UBrk(kind::Integer, str::UBrkStrTypes, loc::AbstractString) = UBrk(kind, str, cvt_ascii(loc))
 
 """
     Close the Break Iterator and return any resource, if not already closed
 """
-close(bi::UBrk) =
-    bi.p == C_NULL ||
-        (ccall(@libbrk(close), Cvoid, (Ptr{Cvoid},), bi.p) ; bi.p = C_NULL ; bi.s = Cvoid() ; bi.r = Cvoid())
+function close(bi::UBrk)
+    bi.p == C_NULL && return
+    ccall(@libbrk(close), Cvoid, (Ptr{Cvoid},), bi.p)
+    bi.p = C_NULL
+    bi.s = Cvoid()
+    bi.r = Cvoid()
+    nothing
+end
 
 """
     Determine the most recently-returned text boundary.

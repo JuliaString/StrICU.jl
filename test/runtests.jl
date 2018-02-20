@@ -5,10 +5,11 @@ const ICU = StrICU
 @static VERSION < v"0.7.0-DEV" ? (using Base.Test) : (using Test)
 
 # Tests for not overrunning buffer
-str = "\u3b0"
-upp = "\u3a5\u308\u301"
+let str = "\u3b0",
+    upp = "\u3a5\u308\u301"
 
-@test ICU.toupper(ICU.cvt_utf16(str^8)) == ICU.cvt_utf16(upp^8)
+    @test ICU.toupper(ICU.cvt_utf16(str^8)) == ICU.cvt_utf16(upp^8)
+end
 
 @testset "utext" begin
 end
