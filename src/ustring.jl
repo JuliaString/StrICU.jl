@@ -49,22 +49,22 @@ module ustring end
 
 macro libstr(s)     ; _libicu(s, iculib,     "u_str")     ; end
 
-_tolower(dest, destsiz, src, srclen, err) =
+_tolower(dest::Ptr{UInt16}, destsiz, src::Ptr{UInt16}, srclen, err) =
     ccall(@libstr(ToLower), Cint,
           (Ptr{UChar}, Cint, Ptr{UChar}, Cint, Ptr{UInt8}, Ptr{UErrorCode}),
           dest, destsiz, src, srclen, locale[], err)
 
-_toupper(dest, destsiz, src, srclen, err) =
+_toupper(dest::Ptr{UInt16}, destsiz, src::Ptr{UInt16}, srclen, err) =
     ccall(@libstr(ToUpper), Cint,
           (Ptr{UChar}, Cint, Ptr{UChar}, Cint, Ptr{UInt8}, Ptr{UErrorCode}),
           dest, destsiz, src, srclen, locale[], err)
 
-_foldcase(dest, destsiz, src, srclen, err) =
+_foldcase(dest::Ptr{UInt16}, destsiz, src::Ptr{UInt16}, srclen, err) =
     ccall(@libstr(FoldCase), Cint,
           (Ptr{UChar}, Cint, Ptr{UChar}, Cint, Cint, Ptr{UErrorCode}),
           dest, destsiz, src, srclen, 0, err)
 
-_totitle(dest, destsiz, src, srclen, breakiter, err) =
+_totitle(dest::Ptr{UInt16}, destsiz, src::Ptr{UInt16}, srclen, breakiter, err) =
     ccall(@libstr(ToTitle), Cint,
           (Ptr{UChar}, Cint, Ptr{UChar}, Cint, Ptr{Cvoid}, Ptr{UInt8}, Ptr{UErrorCode}),
           dest, destsiz, src, src, breakiter, locale[], err)
@@ -86,19 +86,22 @@ _totitle(dest, destsiz, src, srclen, breakiter, err) =
 """
 function foldcase end
 
+const WordStringCSE = Union{Strs.UCS2CSE, Strs._UCS2CSE, Strs.UTF16CSE}
+const WordStrings = Str{<:WordStringCSE}
+
 for f in (:tolower, :toupper, :foldcase)
     uf = Symbol(string('_',f))
     @eval begin
-        function ($f)(str::T) where {T<:Union{UCS2Str, UTF16Str}}
-            srclen = ncodeunits(str)
+        function ($f)(src::T) where {T<:WordStrings}
+            srclen = ncodeunits(src)
             dest, pnt = Strs._allocate(UInt16, srclen)
             err = UErrorCode[0]
-            destsiz = ($uf)(pnt, srclen, Strs._pnt(str), srclen, err)
+            destsiz = ($uf)(pnt, srclen, Strs._pnt(src), srclen, err)
             # Retry with large enough buffer if got buffer overflow
             if err[1] == U_BUFFER_OVERFLOW_ERROR
                 dest, pnt = Strs._allocate(UInt16, destsiz)
                 err[1] = 0
-                ($uf)(pnt, destsiz, Strs._pnt(str), srclen, err)
+                ($uf)(pnt, destsiz, Strs._pnt(src), srclen, err)
             end
             FAILURE(err[1]) && error("failed to map case")
             Str(Strs.cse(T), dest)
@@ -132,8 +135,8 @@ end
 """
 function totitle end
 
-function totitle(str::T, bi) where {T<:Union{UCS2Str, UTF16Str}}
-    srclen = ncodeunits(str)
+function totitle(src::T, bi) where {T<:WordStrings}
+    srclen = ncodeunits(src)
     dest, pnt = Strs._allocate(UInt16, srclen)
     err = UErrorCode[0]
     dstlen = _totitle(pnt, srclen, Strs._pnt(src), srclen, bi, err)
@@ -146,4 +149,4 @@ function totitle(str::T, bi) where {T<:Union{UCS2Str, UTF16Str}}
     FAILURE(err[1]) && error("failed to map case")
     Str(cse(T), dest)
 end
-totitle(str::T) where {T<:Union{UCS2Str, UTF16Str}} = totitle(str, get_break_iterator())
+totitle(str::T) where {T<:WordStrings} = totitle(str, get_break_iterator())
