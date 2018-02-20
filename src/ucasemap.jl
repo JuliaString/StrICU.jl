@@ -22,24 +22,23 @@ for f in (:ToLower, :ToUpper, :FoldCase, :ToTitle)
     ff = Symbol(string("utf8", f))
     uf = Symbol(string('_',lf))
     @eval begin
-        ($uf)(dest::Vector{UInt8}, destsiz, src, srclen, err) =
+        ($uf)(dest, destsiz, src, srclen, err) =
             ccall(@libcasemap($ff), Int32,
                   (Ptr{Cvoid}, Ptr{UInt8}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
                   casemap[], dest, destsiz, src, srclen, err)
-        function ($lf)(s::ByteStr)
-            srclen = Int32(sizeof(s))
-            src = pointer(s)
-            dest = zeros(UInt8, srclen)
+        function ($lf)(str::ByteStr)
+            destsiz = srclen = sizeof(str)
+            dest = Strs._allocate(srclen)
             err = UErrorCode[0]
-            destsiz = ($uf)(dest, srclen, src, srclen, err)
+            siz = ($uf)(dest, destsiz, str, srclen, err)
             # Retry with large enough buffer if got buffer overflow
             if err[1] == U_BUFFER_OVERFLOW_ERROR
                 err[1] = 0
-                resize!(dest, destsiz)
-                ($uf)(dest, destsiz, src, srclen, err)
+                dest = Strs._allocate(destsiz)
+                siz = ($uf)(dest, destsiz, str, srclen, err)
             end
             FAILURE(err[1]) && error("failed to map case")
-            return cvt_utf8(dest[1:destsiz])
+            siz != destsiz ? cvt_utf8(dest[1:destsiz]) : cvt_utf8(dest)
         end
     end
 end
