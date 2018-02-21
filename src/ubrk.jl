@@ -189,35 +189,35 @@ mutable struct UBrk
     r
 
     function UBrk(kind::Integer, str::UBrkStrTypes, loc::ASCIIStr)
-        err = UErrorCode[0]
+        err = Ref{UErrorCode}(0)
         p = ccall(@libbrk(open), Ptr{Cvoid},
                   (UBrkType, Cstring, Ptr{UChar}, Int32, Ptr{UErrorCode}),
                   kind, loc, str, length(str), err)
-        @assert SUCCESS(err[1])
+        @assert SUCCESS(err[])
         # Retain pointer to input vector, otherwise it might be GCed
         self = new(p, str, Cvoid())
         finalizer(self, close)
         self
     end
     function UBrk(kind::Integer, str::UBrkStrTypes)
-        err = UErrorCode[0]
+        err = Ref{UErrorCode}(0)
         p = ccall(@libbrk(open), Ptr{Cvoid},
                   (UBrkType, Ptr{UInt8}, Ptr{UChar}, Int32, Ptr{UErrorCode}),
                   kind, C_NULL, str, length(str), err)
-        @assert SUCCESS(err[1])
+        @assert SUCCESS(err[])
         # Retain pointer to input vector, otherwise it might be GCed
         self = new(p, str, Cvoid())
         finalizer(self, close)
         self
     end
     function UBrk(rules::UBrkStrTypes, str::UBrkStrTypes)
-        err = UErrorCode[0]
+        err = Ref{UErrorCode}(0)
         # Temporary disable UParseError and pass C_NULL
         #p_err = Ref(UParseError())
         p = ccall(@libbrk(openRules), Ptr{Cvoid},
                   (Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{UParseError}, Ptr{UErrorCode}),
                   rules, length(rules), str, length(str), C_NULL, err)
-        @assert SUCCESS(err[1])
+        @assert SUCCESS(err[])
         # Retain pointer to input vector, otherwise it might be GCed
         self = new(p, str, rules)
         finalizer(self, close)
@@ -364,20 +364,20 @@ get_rule_status(bi::UBrk) =
              the most recent boundary returned by the break iterator.
 """
 function get_rule_status_vec(bi::UBrk, fillinvec::Vector{Int32})
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     cnt = ccall(@libbrk(getRuleStatusVec), Int32,
                 (Ptr{Cvoid}, Ptr{Int32}, Int32,  Ptr{UErrorCode}),
                 bi.p, fillinvec, length(fillinvec), err)
-    @assert SUCCESS(err[1])
+    @assert SUCCESS(err[])
     cnt
 end
 
 function get_rule_status_len(bi::UBrk)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     cnt = ccall(@libbrk(getRuleStatusVec), Int32,
                 (Ptr{Cvoid}, Ptr{Int32}, Int32,  Ptr{UErrorCode}),
                 bi.p, C_NULL, 0, err)
-    @assert SUCCESS(err[1])
+    @assert SUCCESS(err[])
     cnt
 end
 
@@ -412,14 +412,14 @@ set!(bi::UBrk, str::AbstractString) = set!(bi, utf16(str))
 set!(bi::UBrk, str::UTF16Str) = set!(bi, Vector{UInt16}(str))
 
 function set!(bi::UBrk, v::Vector{UInt16})
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     ccall(@libbrk(setText), Cvoid,
           (Ptr{Cvoid}, Ptr{UChar}, Int32, Ptr{UErrorCode}),
           bi.p, v, length(v), err)
     # Retain pointer so that it won't be GCed
     bi.s = v
-    @assert SUCCESS(err[1])
-    err[1]
+    @assert SUCCESS(err[])
+    err[]
 end
 
 """
@@ -441,10 +441,10 @@ end
     Returns status code
 """
 function set!(bi::UBrk, t::UText)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     ccall(@libbrk(setUText), Cvoid,
           (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{UErrorCode}),
           bi.p, t.p, err)
-    @assert SUCCESS(err[1])
-    err[1]
+    @assert SUCCESS(err[])
+    err[]
 end

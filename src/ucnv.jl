@@ -15,9 +15,9 @@ mutable struct UConverter
     p::Ptr{Cvoid}
 
     function UConverter(name::ASCIIStr)
-        err = UErrorCode[0]
+        err = Ref{UErrorCode}(0)
         p = ccall(@libcnv(open), Ptr{Cvoid}, (Cstring, Ptr{UErrorCode}), name, err)
-        SUCCESS(err[1]) || error("ICU: could not open converter ", name)
+        SUCCESS(err[]) || error("ICU: could not open converter ", name)
         self = new(p)
         finalizer(self, close)
         self
@@ -44,7 +44,7 @@ function convert!(dstcnv::UConverter, srccnv::UConverter,
     p = Ptr{UInt8}[pointer(dst.data, position(dst)+1),
                    pointer(src.data, position(src)+1)]
     p0 = copy(p)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     ccall(@libcnv(convertEx), Cvoid,
           (Ptr{Cvoid}, Ptr{Cvoid},
            Ptr{Ptr{UInt8}}, Ptr{UInt8}, Ptr{Ptr{UInt8}}, Ptr{UInt8},
@@ -61,18 +61,18 @@ function convert!(dstcnv::UConverter, srccnv::UConverter,
     dst.size += p[1] - p0[1]
     dst.ptr += p[1] - p0[1]
     src.ptr += p[2] - p0[2]
-    err[1] == U_BUFFER_OVERFLOW_ERROR && return true
-    @assert SUCCESS(err[1])
+    err[] == U_BUFFER_OVERFLOW_ERROR && return true
+    @assert SUCCESS(err[])
     false
 end
 
 function to_uchars(cnv::UConverter, b::Vector{UInt8})
     u = zeros(UCS2Chr, 2*length(b)+1)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     n = ccall(@libcnv(toUChars), Int32,
               (Ptr{Cvoid}, Ptr{UCS2Chr}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
               cnv.p, u, length(u), b, length(b), err)
-    SUCCESS(err[1]) || error("ICU: could not convert string")
+    SUCCESS(err[]) || error("ICU: could not convert string")
     UTF16Str(u[1:n])
 end
 
@@ -85,9 +85,9 @@ end
     Return `true` if the converter contains ambiguous mapping of the same character, `false` otherwise.
 """
 function isambiguous(cnv::UConverter)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     v = ccall(@libcnv(isAmbiguous), Bool, (Ptr{Cvoid}, Ptr{UErrorCode}), cnv.p, err)
-    SUCCESS(err[1]) || error("ICU: internal error in ucnv_isFixedWidth")
+    SUCCESS(err[]) || error("ICU: internal error in ucnv_isFixedWidth")
     v
 end
 
@@ -113,13 +113,13 @@ end
     Returns: the name of the encoding detected, and the length of the signature
 """
 function detect_unicode_signature(src::Vector{UInt8})
-    err = UErrorCode[0]
-    sig = Int32[0]
+    err = Ref{UErrorCode}(0)
+    sig = Ref{Int32}(0)
     p = ccall(@libcnv(detectUnicodeSignature), Ptr{UInt8},
               (Ptr{UInt8}, Int32, Ptr{Int32}, Ptr{UErrorCode}),
               src, sizeof(src), sig, err)
-    SUCCESS(err[1]) || error("ICU: internal error in ucnv_detectUnicodeSignature")
-    return (p == C_NULL ? UTF8Str() : UTF8Str(p), sig[1])
+    SUCCESS(err[]) || error("ICU: internal error in ucnv_detectUnicodeSignature")
+    return (p == C_NULL ? UTF8Str() : UTF8Str(p), sig[])
 end
 
 """
@@ -134,9 +134,9 @@ end
     Returns: the number of chars in the state or -1 if an error is encountered.
 """
 function from_ucount_pending(cnv::UConverter)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     v = ccall(@libcnv(toUCountPending), Int32, (Ptr{Cvoid}, Ptr{UErrorCode}), cnv.p, err)
-    SUCCESS(err[1]) || error("ICU: internal error in ucnv_fromUCountPending")
+    SUCCESS(err[]) || error("ICU: internal error in ucnv_fromUCountPending")
     v
 end
 
@@ -152,9 +152,9 @@ end
     Returns: the number of chars in the state or -1 if an error is encountered.
 """
 function to_ucount_pending(cnv::UConverter)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     v = ccall(@libcnv(toUCountPending), Int32, (Ptr{Cvoid}, Ptr{UErrorCode}), cnv.p, err)
-    SUCCESS(err[1]) || error("ICU: internal error in ucnv_toUCountPending")
+    SUCCESS(err[]) || error("ICU: internal error in ucnv_toUCountPending")
     v
 end
 
@@ -176,9 +176,9 @@ end
     Returns: `true` if the converter is fixed-width
 """
 function is_fixed_width(cnv::UConverter)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     v = ccall(@libcnv(isFixedWidth), Bool, (Ptr{Cvoid}, Ptr{UErrorCode}), cnv.p, err)
-    SUCCESS(err[1]) || error("ICU: internal error in ucnv_isFixedWidth")
+    SUCCESS(err[]) || error("ICU: internal error in ucnv_isFixedWidth")
     v
 end
 

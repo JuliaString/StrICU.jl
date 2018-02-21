@@ -14,12 +14,12 @@ mutable struct UText
     s
 
     function UText(str::ByteStr)
-        err = UErrorCode[0]
+        err = Ref{UErrorCode}(0)
         v = convert(UTF8Str, str)
         p = ccall(@libtext(openUTF8), Ptr{Cvoid},
                   (Ptr{Cvoid}, Ptr{UInt8}, Int64, Ptr{UErrorCode}),
                   C_NULL, v, sizeof(v), err)
-        @assert SUCCESS(err[1])
+        @assert SUCCESS(err[])
         # Retain pointer to data so that it won't be GCed
         self = new(p, v)
         finalizer(self, close)
@@ -27,11 +27,11 @@ mutable struct UText
     end
 
     function UText(str::UTF16Str)
-        err = UErrorCode[0]
+        err = Ref{UErrorCode}(0)
         p = ccall(@libtext(openUChars), Ptr{Cvoid},
                   (Ptr{Cvoid}, Ptr{UChar}, Int64, Ptr{UErrorCode}),
                   C_NULL, pointer(str), ncodeunits(str), err)
-        @assert SUCCESS(err[1])
+        @assert SUCCESS(err[])
         # Retain pointer to data so that it won't be GCed
         self = new(p, str)
         finalizer(self, close)
