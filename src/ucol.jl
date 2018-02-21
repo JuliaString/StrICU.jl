@@ -37,11 +37,11 @@ mutable struct UCollator
 end
 
 function _ucol_open(loc::ASCIIStr)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     p = (loc == ""
          ? ccall(@libcol(open), Ptr{Cvoid}, (Ptr{UInt8}, Ptr{UErrorCode}), C_NULL, err)
          : ccall(@libcol(open), Ptr{Cvoid}, (Cstring, Ptr{UErrorCode}), loc, err))
-    SUCCESS(err[1]) || error("ICU: could not open collator for locale ", loc)
+    SUCCESS(err[]) || error("ICU: could not open collator for locale ", loc)
     p
 end
 _ucol_open(loc::AbstractString) = _ucol_open(ASCIIStr(loc))
@@ -67,21 +67,21 @@ function strcoll end
 
 strcoll(c::UCollator, a::ByteStr, b::ByteStr) = strcoll(c, Vector{UInt8}(a), Vector{UInt8}(b))
 function strcoll(c::UCollator, a::Vector{UInt8}, b::Vector{UInt8})
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     o = ccall(@libcol(strcollUTF8), Int32,
               (Ptr{Cvoid}, Ptr{UInt8}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
               c.p, a, sizeof(a), b, sizeof(b), err)
-    @assert SUCCESS(err[1])
+    @assert SUCCESS(err[])
     o
 end
 
 strcoll(c::UCollator, a::UniStr, b::UniStr) = strcoll(c, Vector{UInt16}(a), Vector{UInt16}(b))
 function strcoll(c::UCollator, a::Vector{UInt16}, b::Vector{UInt16})
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     o = ccall(@libcol(strcoll), Int32,
               (Ptr{Cvoid}, Ptr{UChar}, Int32, Ptr{UChar}, Int32, Ptr{UErrorCode}),
               c.p, a, length(a), b, length(b), err)
-    @assert SUCCESS(err[1])
+    @assert SUCCESS(err[])
     o
 end
 strcoll(c::UCollator, a::UniStr, b::AbstractString) = strcoll(c, a, cvt_utf16(b))

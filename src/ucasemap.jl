@@ -29,15 +29,15 @@ for f in (:ToLower, :ToUpper, :FoldCase, :ToTitle)
         function ($lf)(str::ByteStr)
             destsiz = srclen = sizeof(str)
             dest = Strs._allocate(srclen)
-            err = UErrorCode[0]
+            err = Ref{UErrorCode}(0)
             siz = ($uf)(dest, destsiz, str, srclen, err)
             # Retry with large enough buffer if got buffer overflow
-            if err[1] == U_BUFFER_OVERFLOW_ERROR
-                err[1] = 0
+            if err[] == U_BUFFER_OVERFLOW_ERROR
+                err[] = 0
                 dest = Strs._allocate(destsiz)
                 siz = ($uf)(dest, destsiz, str, srclen, err)
             end
-            FAILURE(err[1]) && error("failed to map case")
+            FAILURE(err[]) && error("failed to map case")
             siz != destsiz ? cvt_utf8(dest[1:destsiz]) : cvt_utf8(dest)
         end
     end
@@ -51,13 +51,13 @@ function set_locale!(loc::ASCIIStr)
         casemap[] = C_NULL
     end
     collator[] = UCollator(loc)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     casemap[] = (loc == ""
                  ? ccall(@libcasemap(open), Ptr{Cvoid}, (Ptr{UInt8}, Int32, Ptr{UErrorCode}),
                          C_NULL, 0, err)
                  : ccall(@libcasemap(open), Ptr{Cvoid}, (Cstring, Int32, Ptr{UErrorCode}),
                          loc, 0, err))
-    FAILURE(err[1]) && error("could not set casemap")
+    FAILURE(err[]) && error("could not set casemap")
     locale[] = loc
 end
 

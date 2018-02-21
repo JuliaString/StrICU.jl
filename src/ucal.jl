@@ -53,7 +53,7 @@ mutable struct UCalendar
 
     UCalendar(tz::UTF16Str) = UCalendar(Vector{UInt16}(tz))
     function UCalendar(tz::Vector{UInt16})
-        err = UErrorCode[0]
+        err = Ref{UErrorCode}(0)
         p = ccall(@libcal(open), Ptr{Cvoid},
                   (Ptr{UChar}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
                   tz, length(tz), locale[], 0, err)
@@ -62,7 +62,7 @@ mutable struct UCalendar
         self
     end
     function UCalendar()
-        err = UErrorCode[0]
+        err = Ref{UErrorCode}(0)
         p = ccall(@libcal(open), Ptr{Cvoid},
                   (Ptr{UChar}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
                   C_NULL, 0, locale[], 0, err)
@@ -80,19 +80,19 @@ close(c::UCalendar) =
 getnow() = ccall(@libcal(getNow), UDate, ())
 
 function get_millis(cal::UCalendar)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     ccall(@libcal(getMillis), UDate, (Ptr{Cvoid}, Ptr{UErrorCode}), cal.ptr, err)
 end
 
 function set_millis!(cal::UCalendar, millis::UDate)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     ccall(@libcal(setMillis), Cvoid,
           (Ptr{Cvoid}, UDate, Ptr{UErrorCode}),
           cal.ptr, millis, err)
 end
 
 function set_date!(cal::UCalendar, y::Integer, m::Integer, d::Integer)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     ccall(@libcal(setDate), Cvoid,
           (Ptr{Cvoid}, Int32, Int32, Int32, Ptr{UErrorCode}),
           cal.ptr, y, m-1, d, err)
@@ -100,21 +100,21 @@ end
 
 function set_datetime!(cal::UCalendar, y::Integer, mo::Integer, d::Integer,
                      h::Integer, mi::Integer, s::Integer)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     ccall(@libcal(setDateTime), Cvoid,
           (Ptr{Cvoid}, Int32, Int32, Int32, Int32, Int32, Int32, Ptr{UErrorCode}),
           cal.ptr, y, mo-1, d, h, mi, s, err)
 end
 
 function clear!(cal::UCalendar)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     ccall(@libcal(clear), Cvoid,
           (Ptr{Cvoid}, Ptr{UErrorCode}),
           cal.ptr, err)
 end
 
 function get(cal::UCalendar, field::Int32)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     ccall(@libcal(get), Int32,
           (Ptr{Cvoid},Int32,Ptr{UErrorCode}),
           cal.ptr, field, err)
@@ -122,7 +122,7 @@ end
 get(cal::UCalendar, fields::Vector{Int32}) = [get(cal,f) for f in fields]
 
 function add!(cal::UCalendar, field::Int32, amount::Integer)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     ccall(@libcal(add), Int32,
           (Ptr{Cvoid},Int32,Int32,Ptr{UErrorCode}),
           cal.ptr, field, amount, err)
@@ -134,7 +134,7 @@ set!(cal::UCalendar, field::Int32, val::Integer) =
 function get_timezone_displayname(cal::UCalendar)
     bufsz = 64
     buf = zeros(UInt16, bufsz)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     len = ccall(@libcal(getTimeZoneDisplayName), Int32,
                 (Ptr{Cvoid}, Int32, Ptr{UInt8}, Ptr{UChar}, Int32, Ptr{UErrorCode}),
                 cal.ptr, 1, locale[], buf, bufsz, err)
@@ -144,7 +144,7 @@ end
 function get_default_timezone()
     bufsz = 64
     buf = zeros(UInt16, bufsz)
-    err = UErrorCode[0]
+    err = Ref{UErrorCode}(0)
     len = ccall(@libcal(getDefaultTimeZone), Int32,
                 (Ptr{UChar}, Int32, Ptr{UErrorCode}),
                 buf, bufsz, err)
