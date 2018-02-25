@@ -51,16 +51,17 @@ export UCalendar
 mutable struct UCalendar
     ptr::Ptr{Cvoid}
 
-    UCalendar(tz::UTF16Str) = UCalendar(Vector{UInt16}(tz))
-    function UCalendar(tz::Vector{UInt16})
+    function UCalendar(tz::Ptr{UInt16}, len)
         err = Ref{UErrorCode}(0)
         p = ccall(@libcal(open), Ptr{Cvoid},
                   (Ptr{UChar}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
-                  tz, length(tz), locale[], 0, err)
+                  tz, len, locale[], 0, err)
         self = new(p)
         finalizer(self, close)
         self
     end
+    UCalendar(tz::WordStrings) = UCalendar(Strs._pnt(tz), ncodeunits(tz))
+    UCalendar(tz::Vector{UInt16}) = UCalendar(pointer(tz), length(tz))
     function UCalendar()
         err = Ref{UErrorCode}(0)
         p = ccall(@libcal(open), Ptr{Cvoid},
@@ -133,20 +134,20 @@ set!(cal::UCalendar, field::Int32, val::Integer) =
 
 function get_timezone_displayname(cal::UCalendar)
     bufsz = 64
-    buf = zeros(UInt16, bufsz)
+    buf, pnt = Strs._allocate(UInt16, bufsz)
     err = Ref{UErrorCode}(0)
     len = ccall(@libcal(getTimeZoneDisplayName), Int32,
                 (Ptr{Cvoid}, Int32, Ptr{UInt8}, Ptr{UChar}, Int32, Ptr{UErrorCode}),
-                cal.ptr, 1, locale[], buf, bufsz, err)
-    UTF16Str(buf[1:len])
+                cal.ptr, 1, locale[], pnt, bufsz, err)
+    Str(Strs.UTF16CSE, buf[1:len])
 end
 
 function get_default_timezone()
     bufsz = 64
-    buf = zeros(UInt16, bufsz)
+    buf,pnt = Strs._allocate(UInt16, bufsz)
     err = Ref{UErrorCode}(0)
     len = ccall(@libcal(getDefaultTimeZone), Int32,
                 (Ptr{UChar}, Int32, Ptr{UErrorCode}),
-                buf, bufsz, err)
-    UTF16Str(buf[1:len])
+                pnt, bufsz, err)
+    Str(Strs.UTF16CSE, buf[1:len])
 end

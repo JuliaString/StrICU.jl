@@ -28,6 +28,9 @@ export cvt_utf8, cvt_utf16
 
 const ByteStr   = Union{ASCIIStr, UTF8Str, String}
 
+const WordStringCSE = Union{Strs.UCS2CSE, Strs._UCS2CSE, Strs.UTF16CSE}
+const WordStrings = Str{<:WordStringCSE}
+
 export set_locale!
 
 include("../deps/deps.jl")

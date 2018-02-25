@@ -66,14 +66,16 @@ function convert!(dstcnv::UConverter, srccnv::UConverter,
     false
 end
 
-function to_uchars(cnv::UConverter, b::Vector{UInt8})
-    u = zeros(UCS2Chr, 2*length(b)+1)
+function to_uchars(cnv::UConverter, src::Vector{UInt8})
+    srclen = length(src)
+    dstlen = 2 * srclen + 1
+    buf, pnt = Strs._allocate(UInt16, dstlen)
     err = Ref{UErrorCode}(0)
     n = ccall(@libcnv(toUChars), Int32,
               (Ptr{Cvoid}, Ptr{UCS2Chr}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
-              cnv.p, u, length(u), b, length(b), err)
+              cnv.p, pnt, dstlen, src, srclen, err)
     SUCCESS(err[]) || error("ICU: could not convert string")
-    UTF16Str(u[1:n])
+    Str(Strs.UTF16CSE, u[1:n])
 end
 
 """

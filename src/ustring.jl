@@ -67,7 +67,7 @@ _foldcase(dest::Ptr{UInt16}, destsiz, src::Ptr{UInt16}, srclen, err) =
 _totitle(dest::Ptr{UInt16}, destsiz, src::Ptr{UInt16}, srclen, breakiter, err) =
     ccall(@libstr(ToTitle), Cint,
           (Ptr{UChar}, Cint, Ptr{UChar}, Cint, Ptr{Cvoid}, Ptr{UInt8}, Ptr{UErrorCode}),
-          dest, destsiz, src, src, breakiter, locale[], err)
+          dest, destsiz, src, srclen, breakiter, locale[], err)
 
 """
    Case-folds the characters in a string.
@@ -85,9 +85,6 @@ _totitle(dest::Ptr{UInt16}, destsiz, src::Ptr{UInt16}, srclen, breakiter, err) =
    Returns:  Case-folded string
 """
 function foldcase end
-
-const WordStringCSE = Union{Strs.UCS2CSE, Strs._UCS2CSE, Strs.UTF16CSE}
-const WordStrings = Str{<:WordStringCSE}
 
 for f in (:tolower, :toupper, :foldcase)
     uf = Symbol(string('_',f))
@@ -147,6 +144,6 @@ function totitle(src::T, bi) where {T<:WordStrings}
         _totitle(pnt, dstlen, Strs._pnt(src), srclen, bi, err)
     end
     FAILURE(err[]) && error("failed to map case")
-    Str(cse(T), dest)
+    Str(Strs.cse(T), dest)
 end
 totitle(str::T) where {T<:WordStrings} = totitle(str, get_break_iterator())
