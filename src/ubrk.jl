@@ -408,19 +408,20 @@ end
 """
 function set! end
 
-set!(bi::UBrk, str::AbstractString) = set!(bi, utf16(str))
-set!(bi::UBrk, str::UTF16Str) = set!(bi, Vector{UInt16}(str))
-
-function set!(bi::UBrk, v::Vector{UInt16})
+function set!(bi::UBrk, v, pnt::Ptr{UInt16}, len)
     err = Ref{UErrorCode}(0)
     ccall(@libbrk(setText), Cvoid,
           (Ptr{Cvoid}, Ptr{UChar}, Int32, Ptr{UErrorCode}),
-          bi.p, v, length(v), err)
+          bi.p, v, len, err)
     # Retain pointer so that it won't be GCed
     bi.s = v
     @assert SUCCESS(err[])
     err[]
 end
+
+set!(bi::UBrk, str::AbstractString) = set!(bi, cvt_utf16(str))
+set!(bi::UBrk, str::WordStrings)    = set!(bi, str, Strs._pnt(str), ncodeunits(str))
+set!(bi::UBrk, v::Vector{UInt16})   = set!(bi, v, pointer(v), length(v))
 
 """
     Sets an existing iterator to point to a new piece of text.

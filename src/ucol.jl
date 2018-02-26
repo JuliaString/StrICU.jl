@@ -75,7 +75,8 @@ function strcoll(c::UCollator, a::Vector{UInt8}, b::Vector{UInt8})
     o
 end
 
-strcoll(c::UCollator, a::UniStr, b::UniStr) = strcoll(c, Vector{UInt16}(a), Vector{UInt16}(b))
+strcoll(c::UCollator, a::UTF16Str, b::UTF16Str) =
+    strcoll(c, Vector{UInt16}(a), Vector{UInt16}(b))
 function strcoll(c::UCollator, a::Vector{UInt16}, b::Vector{UInt16})
     err = Ref{UErrorCode}(0)
     o = ccall(@libcol(strcoll), Int32,
@@ -84,8 +85,8 @@ function strcoll(c::UCollator, a::Vector{UInt16}, b::Vector{UInt16})
     @assert SUCCESS(err[])
     o
 end
-strcoll(c::UCollator, a::UniStr, b::AbstractString) = strcoll(c, a, cvt_utf16(b))
-strcoll(c::UCollator, a::AbstractString, b::UniStr) = strcoll(c, cvt_utf16(a), b)
+strcoll(c::UCollator, a::UTF16Str, b::AbstractString) = strcoll(c, a, cvt_utf16(b))
+strcoll(c::UCollator, a::AbstractString, b::UTF16Str) = strcoll(c, cvt_utf16(a), b)
 
-strcoll(c::UCollator, a::ByteStr, b::UniStr) = strcoll(c, cvt_utf16(a), b)
-strcoll(c::UCollator, a::UniStr, b::ByteStr) = strcoll(c, a, cvt_utf16(b))
+strcoll(c::UCollator, a::ByteStr, b::UTF16Str) = strcoll(c, cvt_utf16(a), b)
+strcoll(c::UCollator, a::UTF16Str, b::ByteStr) = strcoll(c, a, cvt_utf16(b))
