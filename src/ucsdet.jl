@@ -63,8 +63,9 @@ function set!(csd::UCharsetDetector, s, p::Ptr{UInt8}, len)
     nothing
 end
 set!(csd::UCharsetDetector, s::Str) =
-    set!(csd, s, reinterpret(Ptr{UInt8}, Strs._pnt(s)), ncodeunits(s))
-set!(csd::UCharsetDetector, s::Vector{UInt8}) = set!(csd, s, pointer(s), length(s))
+    Strs.@preserve s set!(csd, s, reinterpret(Ptr{UInt8}, pointer(s)), ncodeunits(s))
+set!(csd::UCharsetDetector, s::Vector{UInt8}) =
+    Strs.@preserve s set!(csd, s, pointer(s), length(s))
 set!(csd::UCharsetDetector, s::CU) = set!(csd, Vector{UInt8}(s))
 set!(csd::UCharsetDetector, s::AbstractString) = set!(csd, codeunits(s))
 
@@ -88,11 +89,11 @@ function set_declared_encoding!(csd::UCharsetDetector, s::Ptr{UInt8}, len)
     nothing
 end
 set_declared_encoding!(csd::UCharsetDetector, s::T) where {T<:Str} =
-    set_declared_encoding(csd, reinterpret(Ptr{UInt8}, Strs._pnt(s)), sizeof(s))
+    Strs.@preserve s set_declared_encoding(csd, reinterpret(Ptr{UInt8}, pointer(s)), sizeof(s))
 set_declared_encoding!(csd::UCharsetDetector, s::AbstractString) =
-    set_declared_encoding(csd, pointer(s), sizeof(s))
+    Strs.@preserve s set_declared_encoding(csd, pointer(s), sizeof(s))
 set_declared_encoding!(csd::UCharsetDetector, s::Vector{T}) where {T<:Union{UInt8,UInt16,UInt32}} =
-    set_declared_encoding(csd, pointer(s), sizeof(s))
+    Strs.@preserve s set_declared_encoding(csd, pointer(s), sizeof(s))
 
 """
    Opaque structure representing a match that was identified from a charset detection operation.
@@ -276,7 +277,7 @@ function get_uchars(csmatch::UCharsetMatch)
     dest = Strs._allocate(UInt16, len+1)
     len = _get_uchars(csmatch, dest, len+1, err)
     SUCCESS(err[]) || error("ICU: could not get string from UCharsetMatch object")
-    Str(Strs.UTF16CSE, dest[1:len])
+    Str(UTF16CSE, dest[1:len])
 end
 
 _get_uchars(p::Ptr{Cvoid}, buf, siz, err) =

@@ -90,18 +90,20 @@ for f in (:tolower, :toupper, :foldcase)
     uf = Symbol(string('_',f))
     @eval begin
         function ($f)(src::T) where {T<:WordStrings}
-            srclen = ncodeunits(src)
-            dest, pnt = Strs._allocate(UInt16, srclen)
-            err = Ref{UErrorCode}(0)
-            destsiz = ($uf)(pnt, srclen, Strs._pnt(src), srclen, err)
-            # Retry with large enough buffer if got buffer overflow
-            if err[] == U_BUFFER_OVERFLOW_ERROR
-                dest, pnt = Strs._allocate(UInt16, destsiz)
-                err[] = 0
-                ($uf)(pnt, destsiz, Strs._pnt(src), srclen, err)
+            Strs.@preserve src begin
+                srclen = ncodeunits(src)
+                dest, pnt = Strs._allocate(UInt16, srclen)
+                err = Ref{UErrorCode}(0)
+                destsiz = ($uf)(pnt, srclen, pointer(src), srclen, err)
+                # Retry with large enough buffer if got buffer overflow
+                if err[] == U_BUFFER_OVERFLOW_ERROR
+                    dest, pnt = Strs._allocate(UInt16, destsiz)
+                    err[] = 0
+                    ($uf)(pnt, destsiz, pointer(src), srclen, err)
+                end
+                FAILURE(err[]) && error("failed to map case")
+                Str(cse(T), dest)
             end
-            FAILURE(err[]) && error("failed to map case")
-            Str(Strs.cse(T), dest)
         end
     end
 end
@@ -134,16 +136,18 @@ function totitle end
 
 function totitle(src::T, bi) where {T<:WordStrings}
     srclen = ncodeunits(src)
-    dest, pnt = Strs._allocate(UInt16, srclen)
-    err = Ref{UErrorCode}(0)
-    dstlen = _totitle(pnt, srclen, Strs._pnt(src), srclen, bi, err)
-    # Retry with large enough buffer if got buffer overflow
-    if err[] == U_BUFFER_OVERFLOW_ERROR
-        dest, pnt = Strs._allocate(UInt16, dstlen)
-        err[] = 0
-        _totitle(pnt, dstlen, Strs._pnt(src), srclen, bi, err)
+    Strs.@preserve src begin
+        dest, pnt = Strs._allocate(UInt16, srclen)
+        err = Ref{UErrorCode}(0)
+        dstlen = _totitle(pnt, srclen, pointer(src), srclen, bi, err)
+        # Retry with large enough buffer if got buffer overflow
+        if err[] == U_BUFFER_OVERFLOW_ERROR
+            dest, pnt = Strs._allocate(UInt16, dstlen)
+            err[] = 0
+            _totitle(pnt, dstlen, pointer(src), srclen, bi, err)
+        end
+        FAILURE(err[]) && error("failed to map case")
+        Str(cse(T), dest)
     end
-    FAILURE(err[]) && error("failed to map case")
-    Str(Strs.cse(T), dest)
 end
 totitle(str::T) where {T<:WordStrings} = totitle(str, get_break_iterator())
