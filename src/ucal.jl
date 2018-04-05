@@ -60,8 +60,8 @@ mutable struct UCalendar
         finalizer(self, close)
         self
     end
-    UCalendar(tz::WordStrings) = UCalendar(Strs._pnt(tz), ncodeunits(tz))
-    UCalendar(tz::Vector{UInt16}) = UCalendar(pointer(tz), length(tz))
+    UCalendar(tz::WordStrings) = Strs.@preserve tz UCalendar(pointer(tz), ncodeunits(tz))
+    UCalendar(tz::Vector{UInt16}) = Strs.@preserve tz UCalendar(pointer(tz), length(tz))
     function UCalendar()
         err = Ref{UErrorCode}(0)
         p = ccall(@libcal(open), Ptr{Cvoid},

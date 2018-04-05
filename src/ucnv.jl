@@ -41,41 +41,45 @@ end
 function convert!(dstcnv::UConverter, srccnv::UConverter,
                   dst::IOBuffer, src::IOBuffer, pivot::UConverterPivot,
                   reset::Bool=false, flush::Bool=true)
-    p = Ptr{UInt8}[pointer(dst.data, position(dst)+1),
-                   pointer(src.data, position(src)+1)]
-    p0 = copy(p)
-    err = Ref{UErrorCode}(0)
-    ccall(@libcnv(convertEx), Cvoid,
-          (Ptr{Cvoid}, Ptr{Cvoid},
-           Ptr{Ptr{UInt8}}, Ptr{UInt8}, Ptr{Ptr{UInt8}}, Ptr{UInt8},
-           Ptr{UCS2Chr}, Ptr{Ptr{UCS2Chr}}, Ptr{Ptr{UCS2Chr}}, Ptr{UCS2Chr},
-           UBool, UBool, Ptr{UErrorCode}),
-          dstcnv.p, srccnv.p,
-          pointer(p, 1), pointer(dst.data, length(dst.data)+1),
-          pointer(p, 2), pointer(src.data, src.size+1),
-          pointer(pivot.buf, 1),
-          pointer(pivot.pos, 1),
-          pointer(pivot.pos, 2),
-          pointer(pivot.buf, length(pivot.buf)+1),
-          reset, flush, err)
-    dst.size += p[1] - p0[1]
-    dst.ptr += p[1] - p0[1]
-    src.ptr += p[2] - p0[2]
+    Strs.@preserve dst src pivot begin
+        p = Ptr{UInt8}[pointer(dst.data, position(dst)+1),
+                       pointer(src.data, position(src)+1)]
+        p0 = copy(p)
+        err = Ref{UErrorCode}(0)
+        ccall(@libcnv(convertEx), Cvoid,
+              (Ptr{Cvoid}, Ptr{Cvoid},
+               Ptr{Ptr{UInt8}}, Ptr{UInt8}, Ptr{Ptr{UInt8}}, Ptr{UInt8},
+               Ptr{UCS2Chr}, Ptr{Ptr{UCS2Chr}}, Ptr{Ptr{UCS2Chr}}, Ptr{UCS2Chr},
+               UBool, UBool, Ptr{UErrorCode}),
+              dstcnv.p, srccnv.p,
+              pointer(p, 1), pointer(dst.data, length(dst.data)+1),
+              pointer(p, 2), pointer(src.data, src.size+1),
+              pointer(pivot.buf, 1),
+              pointer(pivot.pos, 1),
+              pointer(pivot.pos, 2),
+              pointer(pivot.buf, length(pivot.buf)+1),
+              reset, flush, err)
+        dst.size += p[1] - p0[1]
+        dst.ptr += p[1] - p0[1]
+        src.ptr += p[2] - p0[2]
+    end
     err[] == U_BUFFER_OVERFLOW_ERROR && return true
     @assert SUCCESS(err[])
     false
 end
 
 function to_uchars(cnv::UConverter, src::Vector{UInt8})
-    srclen = length(src)
-    dstlen = 2 * srclen + 1
-    buf, pnt = Strs._allocate(UInt16, dstlen)
-    err = Ref{UErrorCode}(0)
-    n = ccall(@libcnv(toUChars), Int32,
-              (Ptr{Cvoid}, Ptr{UCS2Chr}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
-              cnv.p, pnt, dstlen, src, srclen, err)
-    SUCCESS(err[]) || error("ICU: could not convert string")
-    Str(Strs.UTF16CSE, u[1:n])
+    Strs.@preserve src begin
+        srclen = length(src)
+        dstlen = 2 * srclen + 1
+        buf, pnt = Strs._allocate(UInt16, dstlen)
+        err = Ref{UErrorCode}(0)
+        n = ccall(@libcnv(toUChars), Int32,
+                  (Ptr{Cvoid}, Ptr{UCS2Chr}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
+                  cnv.p, pnt, dstlen, src, srclen, err)
+        SUCCESS(err[]) || error("ICU: could not convert string")
+        Str(UTF16CSE, u[1:n])
+    end
 end
 
 """

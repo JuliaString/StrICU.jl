@@ -420,8 +420,10 @@ function set!(bi::UBrk, v, pnt::Ptr{UInt16}, len)
 end
 
 set!(bi::UBrk, str::AbstractString) = set!(bi, cvt_utf16(str))
-set!(bi::UBrk, str::WordStrings)    = set!(bi, str, Strs._pnt(str), ncodeunits(str))
-set!(bi::UBrk, v::Vector{UInt16})   = set!(bi, v, pointer(v), length(v))
+set!(bi::UBrk, str::WordStrings) =
+    Strs.@preserve str set!(bi, str, pointer(str), ncodeunits(str))
+set!(bi::UBrk, v::Vector{UInt16}) =
+    Strs.@preserve v set!(bi, v, pointer(v), length(v))
 
 """
     Sets an existing iterator to point to a new piece of text.

@@ -48,14 +48,16 @@ mutable struct UDateFormat
 end
 
 UDateFormat(tstyle::Integer, dstyle::Integer, tz::WordStrings) =
-    UDateFormat(tstyle, dstyle, Strs._pnt(tz), ncodeunits(tz))
+    Strs.@preserve tz UDateFormat(tstyle, dstyle, pointer(tz), ncodeunits(tz))
 UDateFormat(pattern::WordStrings, tz::WordStrings) =
-    UDateFormat(Strs._pnt(pattern), ncodeunits(pattern), Strs._pnt(tz), ncodeunits(tz))
+    Strs.@preserve pattern tz UDateFormat(pointer(pattern), ncodeunits(pattern),
+                                          pointer(tz), ncodeunits(tz))
 
 UDateFormat(tstyle::Integer, dstyle::Integer, tz::Vector{UInt16}) =
-    UDateFormat(tstyle, dstyle, pointer(tz), length(tz))
+    Strs.@preserve tz UDateFormat(tstyle, dstyle, pointer(tz), length(tz))
 UDateFormat(pattern::Vector{UInt16}, tz::Vector{UInt16}) =
-    UDateFormat(pointer(pattern), length(pattern), pointer(tz), length(tz))
+    Strs.@preserve pattern tz UDateFormat(pointer(pattern), length(pattern),
+                                          pointer(tz), length(tz))
 
 UDateFormat(pattern::AbstractString, tz::AbstractString) =
     UDateFormat(cvt_utf16(pattern), cvt_utf16(tz))
@@ -74,12 +76,12 @@ function format(df::UDateFormat, millis::Float64)
                 (Ptr{Cvoid}, Float64, Ptr{UChar}, Int32, Ptr{Cvoid}, Ptr{UErrorCode}),
                 df.ptr, millis, pnt, buflen, C_NULL, err)
     FAILURE(err[]) && error("failed to format time")
-    Str(Strs.UTF16CSE, buf[1:len])
+    Str(UTF16CSE, buf[1:len])
 end
 
 parse(df::UDateFormat, s::AbstractString) = parse(df, cvt_utf16(s))
-parse(df::UDateFormat, s::Vector{UInt16}) = parse(df, pointer(s), length(s))
-parse(df::UDateFormat, s::WordStrings)    = parse(df, Strs._pnt(s), ncodeunits(s))
+parse(df::UDateFormat, s::Vector{UInt16}) = Strs.@preserve s parse(df, pointer(s), length(s))
+parse(df::UDateFormat, s::WordStrings)    = Strs.@preserve s parse(df, pointer(s), ncodeunits(s))
 
 function parse(df::UDateFormat, s16::Ptr{UInt16}, slen)
     err = Ref{UErrorCode}(0)
