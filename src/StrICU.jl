@@ -8,27 +8,27 @@
 """
 module StrICU
 
-@static if VERSION < v"0.7.0-DEV"
-    const Cvoid = Void
-else
+using APITools
+@api init
+@api extend StrAPI, CharSetEncodings, Chars, StrBase
+
+@static if !V6_COMPAT
     const is_windows = Sys.iswindows
     finalizer(o, f::Function) = Base.finalizer(f, o)
 end
 
 import Base: parse, get, close
 
-using Strs
-
 export ICU
 const ICU = StrICU
 
-const cvt_utf8 = Strs.utf8
-const cvt_utf16 = Strs.utf16
+const cvt_utf8 = utf8
+const cvt_utf16 = utf16
 export cvt_utf8, cvt_utf16
 
 const ByteStr   = Union{ASCIIStr, UTF8Str, String}
 
-const WordStringCSE = Union{Strs.UCS2CSE, Strs._UCS2CSE, Strs.UTF16CSE}
+const WordStringCSE = Union{UCS2CSE, _UCS2CSE, UTF16CSE}
 const WordStrings = Str{<:WordStringCSE}
 
 export set_locale!
@@ -94,5 +94,7 @@ include("ucsdet.jl")
 include("udat.jl")
 include("ucal.jl")
 include("ucasemap.jl")
+
+@api freeze
 
 end # module StrICU
