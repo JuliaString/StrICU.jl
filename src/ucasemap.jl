@@ -28,13 +28,13 @@ for f in (:ToLower, :ToUpper, :FoldCase, :ToTitle)
                   casemap[], dest, destsiz, src, srclen, err)
         function ($lf)(str::ByteStr)
             destsiz = srclen = sizeof(str)
-            dest = Strs._allocate(srclen)
+            dest = _allocate(srclen)
             err = Ref{UErrorCode}(0)
             siz = ($uf)(dest, destsiz, str, srclen, err)
             # Retry with large enough buffer if got buffer overflow
             if err[] == U_BUFFER_OVERFLOW_ERROR
                 err[] = 0
-                dest = Strs._allocate(destsiz)
+                dest = _allocate(destsiz)
                 siz = ($uf)(dest, destsiz, str, srclen, err)
             end
             FAILURE(err[]) && error("failed to map case")

@@ -41,8 +41,6 @@ end
 close(c::UCharsetDetector) =
     c.p == C_NULL || (ccall(@libucsdet(close), Cvoid, (Ptr{Cvoid},), c.p); c.p = C_NULL)
 
-const CU = @static VERSION < v"0.7.0-DEV" ? Strs.CodeUnits : Base.CodeUnits
-
 """
    Set the input byte data whose charset is to detected.
 
@@ -63,10 +61,10 @@ function set!(csd::UCharsetDetector, s, p::Ptr{UInt8}, len)
     nothing
 end
 set!(csd::UCharsetDetector, s::Str) =
-    Strs.@preserve s set!(csd, s, reinterpret(Ptr{UInt8}, pointer(s)), ncodeunits(s))
+    @preserve s set!(csd, s, reinterpret(Ptr{UInt8}, pointer(s)), ncodeunits(s))
 set!(csd::UCharsetDetector, s::Vector{UInt8}) =
-    Strs.@preserve s set!(csd, s, pointer(s), length(s))
-set!(csd::UCharsetDetector, s::CU) = set!(csd, Vector{UInt8}(s))
+    @preserve s set!(csd, s, pointer(s), length(s))
+set!(csd::UCharsetDetector, s::CodeUnits) = set!(csd, Vector{UInt8}(s))
 set!(csd::UCharsetDetector, s::AbstractString) = set!(csd, codeunits(s))
 
 """
@@ -89,11 +87,11 @@ function set_declared_encoding!(csd::UCharsetDetector, s::Ptr{UInt8}, len)
     nothing
 end
 set_declared_encoding!(csd::UCharsetDetector, s::T) where {T<:Str} =
-    Strs.@preserve s set_declared_encoding(csd, reinterpret(Ptr{UInt8}, pointer(s)), sizeof(s))
+    @preserve s set_declared_encoding(csd, reinterpret(Ptr{UInt8}, pointer(s)), sizeof(s))
 set_declared_encoding!(csd::UCharsetDetector, s::AbstractString) =
-    Strs.@preserve s set_declared_encoding(csd, pointer(s), sizeof(s))
+    @preserve s set_declared_encoding(csd, pointer(s), sizeof(s))
 set_declared_encoding!(csd::UCharsetDetector, s::Vector{T}) where {T<:Union{UInt8,UInt16,UInt32}} =
-    Strs.@preserve s set_declared_encoding(csd, pointer(s), sizeof(s))
+    @preserve s set_declared_encoding(csd, pointer(s), sizeof(s))
 
 """
    Opaque structure representing a match that was identified from a charset detection operation.
@@ -274,7 +272,7 @@ function get_uchars(csmatch::UCharsetMatch)
     csmatch.p != C_NULL || throw(UndefRefError())
     err = Ref{UErrorCode}(0)
     len = _get_uchars(csmatch, C_NULL, 0, err)
-    dest = Strs._allocate(UInt16, len+1)
+    dest = _allocate(UInt16, len+1)
     len = _get_uchars(csmatch, dest, len+1, err)
     SUCCESS(err[]) || error("ICU: could not get string from UCharsetMatch object")
     Str(UTF16CSE, dest[1:len])

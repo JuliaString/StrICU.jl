@@ -48,15 +48,15 @@ mutable struct UDateFormat
 end
 
 UDateFormat(tstyle::Integer, dstyle::Integer, tz::WordStrings) =
-    Strs.@preserve tz UDateFormat(tstyle, dstyle, pointer(tz), ncodeunits(tz))
+    @preserve tz UDateFormat(tstyle, dstyle, pointer(tz), ncodeunits(tz))
 UDateFormat(pattern::WordStrings, tz::WordStrings) =
-    Strs.@preserve pattern tz UDateFormat(pointer(pattern), ncodeunits(pattern),
+    @preserve pattern tz UDateFormat(pointer(pattern), ncodeunits(pattern),
                                           pointer(tz), ncodeunits(tz))
 
 UDateFormat(tstyle::Integer, dstyle::Integer, tz::Vector{UInt16}) =
-    Strs.@preserve tz UDateFormat(tstyle, dstyle, pointer(tz), length(tz))
+    @preserve tz UDateFormat(tstyle, dstyle, pointer(tz), length(tz))
 UDateFormat(pattern::Vector{UInt16}, tz::Vector{UInt16}) =
-    Strs.@preserve pattern tz UDateFormat(pointer(pattern), length(pattern),
+    @preserve pattern tz UDateFormat(pointer(pattern), length(pattern),
                                           pointer(tz), length(tz))
 
 UDateFormat(pattern::AbstractString, tz::AbstractString) =
@@ -71,7 +71,7 @@ close(df::UDateFormat) =
 function format(df::UDateFormat, millis::Float64)
     err = Ref{UErrorCode}(0)
     buflen = 64
-    buf, pnt = Strs._allocate(UInt16, buflen)
+    buf, pnt = _allocate(UInt16, buflen)
     len = ccall(@libdat(format), Int32,
                 (Ptr{Cvoid}, Float64, Ptr{UChar}, Int32, Ptr{Cvoid}, Ptr{UErrorCode}),
                 df.ptr, millis, pnt, buflen, C_NULL, err)
@@ -80,8 +80,8 @@ function format(df::UDateFormat, millis::Float64)
 end
 
 parse(df::UDateFormat, s::AbstractString) = parse(df, cvt_utf16(s))
-parse(df::UDateFormat, s::Vector{UInt16}) = Strs.@preserve s parse(df, pointer(s), length(s))
-parse(df::UDateFormat, s::WordStrings)    = Strs.@preserve s parse(df, pointer(s), ncodeunits(s))
+parse(df::UDateFormat, s::Vector{UInt16}) = @preserve s parse(df, pointer(s), length(s))
+parse(df::UDateFormat, s::WordStrings)    = @preserve s parse(df, pointer(s), ncodeunits(s))
 
 function parse(df::UDateFormat, s16::Ptr{UInt16}, slen)
     err = Ref{UErrorCode}(0)

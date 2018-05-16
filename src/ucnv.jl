@@ -41,7 +41,7 @@ end
 function convert!(dstcnv::UConverter, srccnv::UConverter,
                   dst::IOBuffer, src::IOBuffer, pivot::UConverterPivot,
                   reset::Bool=false, flush::Bool=true)
-    Strs.@preserve dst src pivot begin
+    @preserve dst src pivot begin
         p = Ptr{UInt8}[pointer(dst.data, position(dst)+1),
                        pointer(src.data, position(src)+1)]
         p0 = copy(p)
@@ -69,10 +69,10 @@ function convert!(dstcnv::UConverter, srccnv::UConverter,
 end
 
 function to_uchars(cnv::UConverter, src::Vector{UInt8})
-    Strs.@preserve src begin
+    @preserve src begin
         srclen = length(src)
         dstlen = 2 * srclen + 1
-        buf, pnt = Strs._allocate(UInt16, dstlen)
+        buf, pnt = _allocate(UInt16, dstlen)
         err = Ref{UErrorCode}(0)
         n = ccall(@libcnv(toUChars), Int32,
                   (Ptr{Cvoid}, Ptr{UCS2Chr}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
