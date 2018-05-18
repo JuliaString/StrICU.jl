@@ -9,7 +9,7 @@
 module StrICU
 
 using APITools
-@api init
+
 @api extend StrAPI, CharSetEncodings, Chars, StrBase
 
 @static if !V6_COMPAT
