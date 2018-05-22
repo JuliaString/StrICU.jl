@@ -8,7 +8,7 @@
 """
 module StrICU
 
-using APITools
+using ModuleInterfaceTools
 
 @api extend StrAPI, CharSetEncodings, Chars, StrBase
 
