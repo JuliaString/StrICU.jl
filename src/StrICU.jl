@@ -10,7 +10,7 @@ module StrICU
 
 using ModuleInterfaceTools
 
-@api extend StrAPI, CharSetEncodings, Chars, StrBase
+@api extend StrAPI, CharSetEncodings, ChrBase, StrBase
 
 @static if !V6_COMPAT
     const is_windows = Sys.iswindows

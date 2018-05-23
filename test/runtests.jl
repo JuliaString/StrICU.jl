@@ -1,8 +1,6 @@
 using StrICU
 
-const ICU = StrICU
-
-@static VERSION < v"0.7.0-DEV" ? (using Base.Test) : (using Test)
+@static ICU.V6_COMPAT ? (using Base.Test) : (using Test)
 
 # Tests for not overrunning buffer
 let str = "\u3b0",
