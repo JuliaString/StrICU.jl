@@ -1,0 +1,9 @@
+name = "StrICU"
+desc = "ICU wrapper using the Str package for UTF-16 support"
+authors = ["ScottPJones <scottjones@alum.mit.edu>"]
+keywords = ["Strings", "ICU", "Encoding", "Regex"]
+license = "MIT"
+uuid = "74bd3093-d400-43d3-8216-79b3093f48e9"
+deps = ["BinDeps", "StrBase"]
+repo = "https://github.com/JuliaString/Strs.jl.git"
+version = "0.1.1"
