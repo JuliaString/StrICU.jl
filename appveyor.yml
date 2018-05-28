@@ -41,8 +41,7 @@ build_script:
 # Need to convert from shallow to complete for Pkg.clone to work
   - IF EXIST .git\shallow (git fetch --unshallow)
   - C:\projects\julia\bin\julia -e "VERSION < v\"0.7.0-DEV\" || (using Pkg,InteractiveUtils);
-      versioninfo(); pkg = \"StrICU\";
-      if VERSION < v\"0.7.0-DEV.5183\" ; Pkg.clone(pwd(), pkg); else; Pkg.add(pwd(), pkg); end;
+      versioninfo(); pkg = \"StrICU\"; VERSION < v\"0.7.0-DEV.5183\" && Pkg.clone(pwd(), pkg);
       Pkg.build(pkg)"
 
 test_script:

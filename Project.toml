@@ -6,8 +6,6 @@ license = "MIT"
 uuid = "62566d7f-c768-4ca3-a8fa-508ab99b922c"
 repo = "https://github.com/JuliaString/Strs.jl.git"
 
-version = "0.1.1"
 [deps]
 BinDeps = "9e28174c-4ba2-5203-b857-d8d62c4213ee"
 StrBase = "9ae48233-fac8-48c3-9111-9059e0a096a8"
-
