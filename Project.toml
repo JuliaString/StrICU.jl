@@ -4,7 +4,9 @@ authors = ["ScottPJones <scottjones@alum.mit.edu>"]
 keywords = ["Strings", "ICU", "Encoding", "Regex"]
 license = "MIT"
 uuid = "62566d7f-c768-4ca3-a8fa-508ab99b922c"
-repo = "https://github.com/JuliaString/Strs.jl.git"
+repo-rev = ""
+repo-url = "https://github.com/JuliaString/Strs.jl.git"
+version = "0.1.0"
 
 [deps]
 BinDeps = "9e28174c-4ba2-5203-b857-d8d62c4213ee"
