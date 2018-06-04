@@ -1,6 +1,4 @@
 julia 0.6
 BinDeps
-ChrBase
-#StrBase
+StrBase
 @windows WinRPM
-
