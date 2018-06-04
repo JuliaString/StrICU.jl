@@ -12,4 +12,5 @@ Unicode = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
 BinDeps = "9e28174c-4ba2-5203-b857-d8d62c4213ee"
 
-StrBase = "9ae48233-fac8-48c3-9111-9059e0a096a8" # 2v12uwlr0ueale6n
+ModuleInterfaceTools = "5cb8414e-7aab-5a03-a681-351269c074bf"
+StrBase = "e79e7a6a-7bb1-5a4d-9d64-da657b06f53a" # 2v12uwlr0ueale6n
