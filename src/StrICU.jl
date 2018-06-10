@@ -10,9 +10,7 @@ module StrICU
 
 using ModuleInterfaceTools
 
-@static V6_COMPAT || (using Pkg)
-
-@api extend StrAPI, CharSetEncodings, ChrBase, StrBase
+@api extend! StrBase
 
 @static if !V6_COMPAT
     const is_windows = Sys.iswindows
