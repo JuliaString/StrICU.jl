@@ -4,7 +4,7 @@ authors = ["ScottPJones <scottjones@alum.mit.edu>"]
 keywords = ["Strings", "ICU", "Encoding", "Regex"]
 license = "MIT"
 uuid = "62566d7f-c768-4ca3-a8fa-508ab99b922c"
-version = "0.1.5"
+version = "0.2.0"
 
 [deps]
 Libdl   = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
