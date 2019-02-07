@@ -17,7 +17,7 @@ mutable struct UConverter
     function UConverter(name::ASCIIStr)
         err = Ref{UErrorCode}(0)
         p = ccall(@libcnv(open), Ptr{Cvoid}, (Cstring, Ptr{UErrorCode}), name, err)
-        SUCCESS(err[]) || error("ICU: could not open converter ", name)
+        SUCCESS(err[]) || error("ICU: $(err[]), could not open converter ", name)
         self = new(p)
         finalizer(self, close)
         self
@@ -77,7 +77,7 @@ function to_uchars(cnv::UConverter, src::Vector{UInt8})
         n = ccall(@libcnv(toUChars), Int32,
                   (Ptr{Cvoid}, Ptr{UCS2Chr}, Int32, Ptr{UInt8}, Int32, Ptr{UErrorCode}),
                   cnv.p, pnt, dstlen, src, srclen, err)
-        SUCCESS(err[]) || error("ICU: could not convert string")
+        SUCCESS(err[]) || error("ICU: $(err[]), could not convert string")
         Str(UTF16CSE, u[1:n])
     end
 end
@@ -93,7 +93,7 @@ end
 function isambiguous(cnv::UConverter)
     err = Ref{UErrorCode}(0)
     v = ccall(@libcnv(isAmbiguous), Bool, (Ptr{Cvoid}, Ptr{UErrorCode}), cnv.p, err)
-    SUCCESS(err[]) || error("ICU: internal error in ucnv_isFixedWidth")
+    SUCCESS(err[]) || error("ICU: internal error $(err[]) in ucnv_isFixedWidth")
     v
 end
 
@@ -124,7 +124,7 @@ function detect_unicode_signature(src::Vector{UInt8})
     p = ccall(@libcnv(detectUnicodeSignature), Ptr{UInt8},
               (Ptr{UInt8}, Int32, Ptr{Int32}, Ptr{UErrorCode}),
               src, sizeof(src), sig, err)
-    SUCCESS(err[]) || error("ICU: internal error in ucnv_detectUnicodeSignature")
+    SUCCESS(err[]) || error("ICU: internal error $(err[]) in ucnv_detectUnicodeSignature")
     return (p == C_NULL ? UTF8Str() : UTF8Str(p), sig[])
 end
 
@@ -142,7 +142,7 @@ end
 function from_ucount_pending(cnv::UConverter)
     err = Ref{UErrorCode}(0)
     v = ccall(@libcnv(toUCountPending), Int32, (Ptr{Cvoid}, Ptr{UErrorCode}), cnv.p, err)
-    SUCCESS(err[]) || error("ICU: internal error in ucnv_fromUCountPending")
+    SUCCESS(err[]) || error("ICU: internal error $(err[]) in ucnv_fromUCountPending")
     v
 end
 
@@ -160,7 +160,7 @@ end
 function to_ucount_pending(cnv::UConverter)
     err = Ref{UErrorCode}(0)
     v = ccall(@libcnv(toUCountPending), Int32, (Ptr{Cvoid}, Ptr{UErrorCode}), cnv.p, err)
-    SUCCESS(err[]) || error("ICU: internal error in ucnv_toUCountPending")
+    SUCCESS(err[]) || error("ICU: internal error $(err[]) in ucnv_toUCountPending")
     v
 end
 
@@ -184,7 +184,7 @@ end
 function is_fixed_width(cnv::UConverter)
     err = Ref{UErrorCode}(0)
     v = ccall(@libcnv(isFixedWidth), Bool, (Ptr{Cvoid}, Ptr{UErrorCode}), cnv.p, err)
-    SUCCESS(err[]) || error("ICU: internal error in ucnv_isFixedWidth")
+    SUCCESS(err[]) || error("ICU: internal error $(err[]) in ucnv_isFixedWidth")
     v
 end
 

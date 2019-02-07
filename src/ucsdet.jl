@@ -32,7 +32,7 @@ mutable struct UCharsetDetector
     function UCharsetDetector()
         err = Ref{UErrorCode}(0)
         p = ccall(@libucsdet(open), Ptr{Cvoid}, (Ptr{UErrorCode},), err)
-        SUCCESS(err[]) || error("ICU: could not open charset detector")
+        SUCCESS(err[]) || error("ICU: $(err[]), could not open charset detector")
         self = new(p, _empty_vec8)
         finalizer(self, close)
         self
@@ -57,7 +57,7 @@ function set!(csd::UCharsetDetector, s, p::Ptr{UInt8}, len)
     err = Ref{UErrorCode}(0)
     ccall(@libucsdet(setText), Cvoid,
           (Ptr{Cvoid}, Ptr{UInt8}, Int32, Ptr{UErrorCode}), csd.p, p, len, err)
-    SUCCESS(err[]) || error("ICU: could not set charset detector text")
+    SUCCESS(err[]) || error("ICU: $(err[]), could not set charset detector text")
     nothing
 end
 set!(csd::UCharsetDetector, s::Str) =
@@ -83,7 +83,7 @@ function set_declared_encoding!(csd::UCharsetDetector, s::Ptr{UInt8}, len)
     err = Ref{UErrorCode}(0)
     ccall(@libucsdet(setDeclaredEncoding), Cvoid,
           (Ptr{Cvoid},Ptr{UInt8},Int32,Ptr{UErrorCode}), csd.p, s, len, err)
-    SUCCESS(err[]) || error("ICU: could not set charset detector declared encoding")
+    SUCCESS(err[]) || error("ICU: $(err[]), could not set charset detector declared encoding")
     nothing
 end
 set_declared_encoding!(csd::UCharsetDetector, s::T) where {T<:Str} =
@@ -126,7 +126,7 @@ end
 function detect(csd::UCharsetDetector)
     err = Ref{UErrorCode}(0)
     p = ccall(@libucsdet(detect), Ptr{Cvoid}, (Ptr{Cvoid},Ptr{UErrorCode}), csd.p, err)
-    SUCCESS(err[]) || error("ICU: could not detect encoding")
+    SUCCESS(err[]) || error("ICU: $(err[]), could not detect encoding")
     p != C_NULL ? UCharsetMatch(p, csd) : nothing
 end
 
@@ -162,7 +162,7 @@ function detectall(csd::UCharsetDetector)
     n = Ref{Int32}(0)
     p = ccall(@libucsdet(detectAll), Ptr{Ptr{Cvoid}},
               (Ptr{Cvoid},Ptr{Int32},Ptr{UErrorCode}), csd.p, n, err)
-    SUCCESS(err[]) || error("ICU: could not detect encoding")
+    SUCCESS(err[]) || error("ICU: $(err[]), could not detect encoding")
     n[] > 0 || return Vector{UCharsetMatch}()
 
     [UCharsetMatch(x) for x in pointer_to_array(p, int(n[]))]
@@ -186,7 +186,7 @@ function get_name(csmatch::UCharsetMatch)
     csmatch.p != C_NULL || throw(UndefRefError())
     err = Ref{UErrorCode}(0)
     name = ccall(@libucsdet(getName), Ptr{UInt8}, (Ptr{Cvoid},Ptr{UErrorCode}), csmatch.p, err)
-    SUCCESS(err[]) || error("ICU: could not get name of matching encoding")
+    SUCCESS(err[]) || error("ICU: $(err[]), could not get name of matching encoding")
     unsafe_string(name)
 end
 
@@ -214,7 +214,7 @@ function get_confidence(csmatch::UCharsetMatch)
     err = Ref{UErrorCode}(0)
     confidence = ccall(@libucsdet(getConfidence), Int32,
                        (Ptr{Cvoid},Ptr{UErrorCode}), csmatch.p, err)
-    SUCCESS(err[]) || error("ICU: could not get confidence")
+    SUCCESS(err[]) || error("ICU: $(err[]), could not get confidence")
     Int(confidence)
 end
 
@@ -246,7 +246,7 @@ function get_language(csmatch::UCharsetMatch)
     csmatch.p != C_NULL || throw(UndefRefError())
     err = Ref{UErrorCode}(0)
     p = ccall(@libucsdet(getLanguage), Ptr{UInt8}, (Ptr{Cvoid},Ptr{UErrorCode}), csmatch.p, err)
-    SUCCESS(err[]) || error("ICU: could not get language")
+    SUCCESS(err[]) || error("ICU: $(err[]), could not get language")
     unsafe_string(p)
 end
 
@@ -274,7 +274,7 @@ function get_uchars(csmatch::UCharsetMatch)
     len = _get_uchars(csmatch, C_NULL, 0, err)
     dest = _allocate(UInt16, len+1)
     len = _get_uchars(csmatch, dest, len+1, err)
-    SUCCESS(err[]) || error("ICU: could not get string from UCharsetMatch object")
+    SUCCESS(err[]) || error("ICU: $(err[]), could not get string from UCharsetMatch object")
     Str(UTF16CSE, dest[1:len])
 end
 
@@ -307,7 +307,7 @@ function get_all_detectable_charsets(csd::UCharsetDetector)
     err = Ref{UErrorCode}(0)
     p = ccall(@libucsdet(getAllDetectableCharsets), Ptr{Cvoid},
               (Ptr{Cvoid}, Ptr{UErrorCode}), csd.p, err)
-    SUCCESS(err[]) || error("ICU: could not get all detected charsetsa")
+    SUCCESS(err[]) || error("ICU: $(err[]), could not get all detected charsets")
     p
 end
 

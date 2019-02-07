@@ -37,7 +37,7 @@ for f in (:ToLower, :ToUpper, :FoldCase, :ToTitle)
                 dest = _allocate(destsiz)
                 siz = ($uf)(dest, destsiz, str, srclen, err)
             end
-            FAILURE(err[]) && error("failed to map case")
+            FAILURE(err[]) && error("failed to map case: $(err[])")
             siz != destsiz ? cvt_utf8(dest[1:destsiz]) : cvt_utf8(dest)
         end
     end
@@ -57,7 +57,7 @@ function set_locale!(loc::ASCIIStr)
                          C_NULL, 0, err)
                  : ccall(@libcasemap(open), Ptr{Cvoid}, (Cstring, Int32, Ptr{UErrorCode}),
                          loc, 0, err))
-    FAILURE(err[]) && error("could not set casemap")
+    FAILURE(err[]) && error("could not set casemap $(err[])")
     locale[] = loc
 end
 

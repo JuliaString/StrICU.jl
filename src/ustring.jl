@@ -101,7 +101,7 @@ for f in (:tolower, :toupper, :foldcase)
                     err[] = 0
                     ($uf)(pnt, destsiz, pointer(src), srclen, err)
                 end
-                FAILURE(err[]) && error("failed to map case")
+                FAILURE(err[]) && error("ICU: internal error $(err[]) failed to map case")
                 Str(cse(T), dest)
             end
         end
@@ -146,7 +146,7 @@ function totitle(src::T, bi) where {T<:WordStrings}
             err[] = 0
             _totitle(pnt, dstlen, pointer(src), srclen, bi, err)
         end
-        FAILURE(err[]) && error("failed to map case")
+        FAILURE(err[]) && error("ICU: internal error $(err[]) failed to map case")
         Str(cse(T), dest)
     end
 end

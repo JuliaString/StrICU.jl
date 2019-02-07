@@ -27,7 +27,7 @@ mutable struct UDateFormat
                   (Int32, Int32, Ptr{UInt8}, Ptr{UChar}, Int32,
                    Ptr{UChar}, Int32, Ptr{UErrorCode}),
                   tstyle, dstyle, locale[], tz, len, C_NULL, 0, err)
-        FAILURE(err[]) && error("bad date format")
+        FAILURE(err[]) && error("ICU: $(err[]), bad date format")
         self = new(p)
         finalizer(self, close)
         self
@@ -40,7 +40,7 @@ mutable struct UDateFormat
                    Ptr{UChar}, Int32, Ptr{UErrorCode}),
                   -2, -2, locale[], tz, tzlen,
                   pattern, patlen, err)
-        FAILURE(err[]) && error("bad date format")
+        FAILURE(err[]) && error("ICU: $(err[]), bad date format")
         self = new(p)
         finalizer(self, close)
         self
@@ -75,7 +75,7 @@ function format(df::UDateFormat, millis::Float64)
     len = ccall(@libdat(format), Int32,
                 (Ptr{Cvoid}, Float64, Ptr{UChar}, Int32, Ptr{Cvoid}, Ptr{UErrorCode}),
                 df.ptr, millis, pnt, buflen, C_NULL, err)
-    FAILURE(err[]) && error("failed to format time")
+    FAILURE(err[]) && error("ICU: $(err[]), failed to format time")
     Str(UTF16CSE, buf[1:len])
 end
 
@@ -88,6 +88,6 @@ function parse(df::UDateFormat, s16::Ptr{UInt16}, slen)
     ret = ccall(@libdat(parse), Float64,
                 (Ptr{Cvoid}, Ptr{UChar}, Int32, Ptr{Int32}, Ptr{UErrorCode}),
                 df.ptr, s16, slen, C_NULL, err)
-    FAILURE(err[]) && error("failed to parse string")
+    FAILURE(err[]) && error("ICU: $(err[]), failed to parse string")
     ret
 end

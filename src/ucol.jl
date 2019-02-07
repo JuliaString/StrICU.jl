@@ -41,7 +41,7 @@ function _ucol_open(loc::ASCIIStr)
     p = (loc == ""
          ? ccall(@libcol(open), Ptr{Cvoid}, (Ptr{UInt8}, Ptr{UErrorCode}), C_NULL, err)
          : ccall(@libcol(open), Ptr{Cvoid}, (Cstring, Ptr{UErrorCode}), loc, err))
-    SUCCESS(err[]) || error("ICU: could not open collator for locale ", loc)
+    SUCCESS(err[]) || error("ICU: $(err[]), could not open collator for locale ", loc)
     p
 end
 _ucol_open(loc::AbstractString) = _ucol_open(ASCIIStr(loc))
