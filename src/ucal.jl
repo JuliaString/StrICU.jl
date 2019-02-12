@@ -144,7 +144,7 @@ end
 
 function get_default_timezone()
     bufsz = 64
-    buf,pnt = _allocate(UInt16, bufsz)
+    buf, pnt = _allocate(UInt16, bufsz)
     err = Ref{UErrorCode}(0)
     len = ccall(@libcal(getDefaultTimeZone), Int32,
                 (Ptr{UChar}, Int32, Ptr{UErrorCode}),

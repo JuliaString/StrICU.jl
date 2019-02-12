@@ -91,18 +91,19 @@ for f in (:tolower, :toupper, :foldcase)
     @eval begin
         function ($f)(src::T) where {T<:WordStrings}
             @preserve src begin
-                srclen = ncodeunits(src)
-                dest, pnt = _allocate(UInt16, srclen)
+                dstlen = srclen = ncodeunits(src)
+                dest, pnt = _allocate(UInt16, dstlen)
                 err = Ref{UErrorCode}(0)
-                destsiz = ($uf)(pnt, srclen, pointer(src), srclen, err)
+                siz = ($uf)(pnt, dstlen, pointer(src), srclen, err)
                 # Retry with large enough buffer if got buffer overflow
                 if err[] == U_BUFFER_OVERFLOW_ERROR
-                    dest, pnt = _allocate(UInt16, destsiz)
                     err[] = 0
-                    ($uf)(pnt, destsiz, pointer(src), srclen, err)
+                    dstlen = siz
+                    dest, pnt = _allocate(UInt16, dstlen)
+                    siz = ($uf)(pnt, dstlen, pointer(src), srclen, err)
                 end
                 FAILURE(err[]) && error("ICU: internal error $(err[]) failed to map case")
-                Str(cse(T), dest)
+                siz != dstlen ? Str(cse(T), dest[1:siz<<1]) : Str(cse(T), dest)
             end
         end
     end
@@ -135,19 +136,20 @@ end
 function totitle end
 
 function totitle(src::T, bi) where {T<:WordStrings}
-    srclen = ncodeunits(src)
+    dstlen = srclen = ncodeunits(src)
     @preserve src begin
-        dest, pnt = _allocate(UInt16, srclen)
+        dest, pnt = _allocate(UInt16, dstlen)
         err = Ref{UErrorCode}(0)
-        dstlen = _totitle(pnt, srclen, pointer(src), srclen, bi, err)
+        siz = _totitle(pnt, dstlen, pointer(src), srclen, bi, err)
         # Retry with large enough buffer if got buffer overflow
         if err[] == U_BUFFER_OVERFLOW_ERROR
-            dest, pnt = _allocate(UInt16, dstlen)
             err[] = 0
-            _totitle(pnt, dstlen, pointer(src), srclen, bi, err)
+            dstlen = siz
+            dest, pnt = _allocate(UInt16, siz)
+            siz = _totitle(pnt, dstlen, pointer(src), srclen, bi, err)
         end
         FAILURE(err[]) && error("ICU: internal error $(err[]) failed to map case")
-        Str(cse(T), dest)
+        siz != dstlen ? Str(cse(T), dest[1:siz<<1]) : Str(cse(T), dest)
     end
 end
 totitle(str::T) where {T<:WordStrings} = totitle(str, get_break_iterator())
