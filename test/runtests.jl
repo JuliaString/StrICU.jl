@@ -6,7 +6,13 @@ using StrICU
 let str = "\u3b0",
     upp = "\u3a5\u308\u301"
 
+    @test ICU.toupper(str^8) == upp^8
     @test ICU.toupper(ICU.cvt_utf16(str^8)) == ICU.cvt_utf16(upp^8)
+
+    # Fix PR #1
+    set_locale!("tr_TR")
+    @test ICU.tolower("AI") == "aı"
+    set_locale!("")
 end
 
 @testset "utext" begin

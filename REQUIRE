@@ -6,4 +6,4 @@ CharSetEncodings 0.2.0
 ChrBase 0.2.0
 MurmurHash3 0.2.0
 StrBase 0.2.0
-#@windows WinRPM
+@windows WinRPM
