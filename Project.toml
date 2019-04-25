@@ -4,6 +4,7 @@ authors = ["ScottPJones <scottjones@alum.mit.edu>"]
 keywords = ["Strings", "ICU", "Encoding", "Regex"]
 license = "MIT"
 uuid = "124badd8-7747-5df6-9c35-5cbf8cd52816"
+version = "1.0.0"
 
 [deps]
 Libdl   = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -20,3 +21,12 @@ Test    = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test"]
+
+[compat]
+julia = "^1.0.0"
+ModuleInterfaceTools = "≥ 1.0.0"
+StrAPI = "≥ 1.0.0"
+MurmurHash3 = "≥ 1.0.0"
+ChrBase = "≥ 1.0.0"
+CharSetEncodings = "≥ 1.0.0"
+StrBase = "≥ 1.0.0"
