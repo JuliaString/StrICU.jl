@@ -4,10 +4,13 @@
 Julia wrapper for the
 [International Components for Unicode (ICU) libraries](http://site.icu-project.org/).
 
-| **Info** | **Windows** | **Linux & MacOS** | **Package Evaluator** | **CodeCov** | **Coveralls** |
-|:------------------:|:------------------:|:---------------------:|:-----------------:|:---------------------:|:-----------------:|
-| [![][license-img]][license-url] | [![][app-s-img]][app-s-url] | [![][travis-s-img]][travis-url] | [![][pkg-s-img]][pkg-s-url] | [![][codecov-img]][codecov-url] | [![][coverall-s-img]][coverall-s-url]
-| [![][gitter-img]][gitter-url] | [![][app-m-img]][app-m-url] | [![][travis-m-img]][travis-url] | [![][pkg-m-img]][pkg-m-url] | [![][codecov-img]][codecov-url] | [![][coverall-m-img]][coverall-m-url]
+[pkg-url]: https://github.com/JuliaString/StrICU.jl.git
+
+[julia-url]:    https://github.com/JuliaLang/Julia
+[julia-release]:https://img.shields.io/github/release/JuliaLang/julia.svg
+
+[release]:      https://img.shields.io/github/release/JuliaString/StrICU.jl.svg
+[release-date]: https://img.shields.io/github/release-date/JuliaString/StrICU.jl.svg
 
 [license-img]:  http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat
 [license-url]:  LICENSE.md
@@ -19,23 +22,17 @@ Julia wrapper for the
 [travis-s-img]: https://travis-ci.org/JuliaString/StrICU.jl.svg
 [travis-m-img]: https://travis-ci.org/JuliaString/StrICU.jl.svg?branch=master
 
-[app-s-url]:    https://ci.appveyor.com/project/ScottPJones/stricu-jl
-[app-m-url]:    https://ci.appveyor.com/project/ScottPJones/stricu-jl/branch/master
-[app-s-img]:    https://ci.appveyor.com/api/projects/status/kcqvq7e2k3o5rn6g?svg=true
-[app-m-img]:    https://ci.appveyor.com/api/projects/status/kcqvq7e2k3o5rn6g/branch/master?svg=true
-
-[pkg-s-url]:    http://pkg.julialang.org/detail/StrICU
-[pkg-m-url]:    http://pkg.julialang.org/detail/StrICU
-[pkg-s-img]:    http://pkg.julialang.org/badges/StrICU_0.6.svg
-[pkg-m-img]:    http://pkg.julialang.org/badges/StrICU_0.7.svg
-
 [codecov-url]:  https://codecov.io/gh/JuliaString/StrICU.jl
 [codecov-img]:  https://codecov.io/gh/JuliaString/StrICU.jl/branch/master/graph/badge.svg
 
-[coverall-s-url]: https://coveralls.io/github/JuliaString/StrICU.jl
-[coverall-m-url]: https://coveralls.io/github/JuliaString/StrICU.jl?branch=master
-[coverall-s-img]: https://coveralls.io/repos/github/JuliaString/StrICU.jl/badge.svg
-[coverall-m-img]: https://coveralls.io/repos/github/JuliaString/StrICU.jl/badge.svg?branch=master
+[contrib]:    https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat
+
+[![][release]][pkg-url] [![][release-date]][pkg-url] [![][license-img]][license-url] [![contributions welcome][contrib]](https://github.com/JuliaString/StrICU.jl/issues)
+
+| **Julia Version** | **Unit Tests** | **Coverage** |
+|:------------------:|:------------------:|:---------------------:|
+| [![][julia-release]][julia-url] | [![][travis-s-img]][travis-url] | [![][codecov-img]][codecov-url]
+| Julia Latest | [![][travis-m-img]][travis-url] | [![][codecov-img]][codecov-url]
 
 This is a new wrapper for the ICU library, designed to work on Julia v0.6 and above,
 using the [Strs.jl](http://github.com/JuliaString/Strs.jl) package to provide support for UTF-16 encoded strings.
