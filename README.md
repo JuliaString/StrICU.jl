@@ -11,16 +11,13 @@ Julia wrapper for the
 
 [release]:      https://img.shields.io/github/release/JuliaString/StrICU.jl.svg
 [release-date]: https://img.shields.io/github/release-date/JuliaString/StrICU.jl.svg
+[checks]:       https://img.shields.io/github/checks-status/JuliaString/StrICU.jl/master
 
 [license-img]:  http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat
 [license-url]:  LICENSE.md
 
 [gitter-img]:   https://badges.gitter.im/Join%20Chat.svg
 [gitter-url]:   https://gitter.im/JuliaString/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
-
-[travis-url]:   https://travis-ci.org/JuliaString/StrICU.jl
-[travis-s-img]: https://travis-ci.org/JuliaString/StrICU.jl.svg
-[travis-m-img]: https://travis-ci.org/JuliaString/StrICU.jl.svg?branch=master
 
 [codecov-url]:  https://codecov.io/gh/JuliaString/StrICU.jl
 [codecov-img]:  https://codecov.io/gh/JuliaString/StrICU.jl/branch/master/graph/badge.svg
@@ -31,8 +28,8 @@ Julia wrapper for the
 
 | **Julia Version** | **Unit Tests** | **Coverage** |
 |:------------------:|:------------------:|:---------------------:|
-| [![][julia-release]][julia-url] | [![][travis-s-img]][travis-url] | [![][codecov-img]][codecov-url]
-| Julia Latest | [![][travis-m-img]][travis-url] | [![][codecov-img]][codecov-url]
+| [![][julia-release]][julia-url] | | [![][codecov-img]][codecov-url]
+| Julia Latest | [![][checks]][pkg-url] | [![][codecov-img]][codecov-url]
 
 This is a new wrapper for the ICU library, designed to work on Julia v0.6 and above,
 using the [Strs.jl](http://github.com/JuliaString/Strs.jl) package to provide support for UTF-16 encoded strings.
