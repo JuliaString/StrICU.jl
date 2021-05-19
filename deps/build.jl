@@ -2,7 +2,8 @@ using BinDeps
 
 include("versions.jl")
 
-@static VERSION < v"0.7.0-DEV" || (const is_windows = Sys.iswindows; const is_apple = Sys.isapple)
+const is_windows = Sys.iswindows
+const is_apple = Sys.isapple
 
 @BinDeps.setup
 

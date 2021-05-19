@@ -12,10 +12,7 @@ using ModuleInterfaceTools
 
 @api extend! StrBase
 
-@static if !V6_COMPAT
-    const is_windows = Sys.iswindows
-    finalizer(o, f::Function) = Base.finalizer(f, o)
-end
+finalizer(o, f::Function) = Base.finalizer(f, o)
 
 import Base: parse, get, close
 
@@ -36,7 +33,7 @@ export set_locale!
 include("../deps/deps.jl")
 include("../deps/versions.jl")
 
-@static if is_windows()
+@static if Sys.iswindows()
     # make sure versions match
     v1 = last(matchall(r"\d{2}", iculib))
     v2 = last(matchall(r"\d{2}", iculibi18n))

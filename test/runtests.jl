@@ -30,7 +30,7 @@ end
 @testset "ubrk (Word/Line/Sentence breaking)" begin
     str = ICU.cvt_utf16("This is a test of splitting sentences and words.  Scott is busy.\nHow does this\nsplit? Tell me.")
     for (sep, res) in ((UBRK.WORD,
-                        [4,5,7,8,9,10,14,15,17,18,27,28,37,38,41,42,47,48,49,50,
+                        [4,5,7,8,9,10,14,15,17,18,27,28,37,38,41,42,47,48,50,
                          55,56,58,59,63,64,65,68,69,73,74,78,79,84,85,86,90,91,93,94]),
                        (UBRK.SENTENCE, [50,65,79,86,94]),
                        (UBRK.LINE, [5,8,10,15,18,28,38,42,50,56,59,65,69,74,79,86,91,94]))
