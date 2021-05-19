@@ -24,13 +24,7 @@ Julia wrapper for the
 
 [contrib]:    https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat
 
-[![][release]][pkg-url] [![][release-date]][pkg-url] [![][license-img]][license-url] [![contributions welcome][contrib]](https://github.com/JuliaString/StrICU.jl/issues)
+[![][release]][pkg-url] [![][release-date]][pkg-url] [![][checks]][pkg-url] [![][codecov-img]][codecov-url] [![][license-img]][license-url] [![contributions welcome][contrib]](https://github.com/JuliaString/StrICU.jl/issues)
 
-| **Julia Version** | **Unit Tests** | **Coverage** |
-|:------------------:|:------------------:|:---------------------:|
-| [![][julia-release]][julia-url] | | [![][codecov-img]][codecov-url]
-| Julia Latest | [![][checks]][pkg-url] | [![][codecov-img]][codecov-url]
-
-This is a new wrapper for the ICU library, designed to work on Julia v0.6 and above,
-using the [Strs.jl](http://github.com/JuliaString/Strs.jl) package to provide support for UTF-16 encoded strings.
+This is a new wrapper for the ICU library, designed to work on Julia v1.0 and above, using the [Strs.jl](http://github.com/JuliaString/Strs.jl) package to provide support for UTF-16 encoded strings.
 The API has been redesigned to not pollute the namespace and to try to be a bit more "Julian"
