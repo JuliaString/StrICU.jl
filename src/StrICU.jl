@@ -10,6 +10,13 @@ module StrICU
 
 using ModuleInterfaceTools
 
+using ICU_jll
+
+# for now, just leave this hardcoded, until I can see how to get the version from ICU_jll
+const suffix = "_68"
+const iculib = ICU_jll.libicuuc
+const iculibi18n = ICU_jll.libicui18n
+
 @api extend! StrBase
 
 finalizer(o, f::Function) = Base.finalizer(f, o)
@@ -30,34 +37,8 @@ const WordStrings = Str{<:WordStringCSE}
 
 export set_locale!
 
-include("../deps/deps.jl")
-include("../deps/versions.jl")
-
-@static if Sys.iswindows()
-    # make sure versions match
-    v1 = last(matchall(r"\d{2}", iculib))
-    v2 = last(matchall(r"\d{2}", iculibi18n))
-    v1 == v2 ||
-        error("ICU library version mismatch $v1 != $v2 -- please correct $(realpath("../deps/deps.jl"))")
-end
-
 function __init__()
     set_locale!("")
-end
-
-global version
-global suffix
-
-dliculib = Libdl.dlopen(iculib)
-
-for (suf,ver) in [("",0);
-                         [("_$i",i) for i in versions];
-                         [("_$(string(i)[1])_$(string(i)[2])",i) for i in versions]]
-    if Libdl.dlsym_e(dliculib, "u_strToUpper"*suf) != C_NULL
-        @eval const version = $ver
-        @eval const suffix  = $suf
-        break
-    end
 end
 
 _libicu(s, lib, p) = ( Symbol(string(p, s, suffix)), lib )
