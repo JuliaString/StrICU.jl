@@ -22,3 +22,4 @@ test = ["Test"]
 julia = "1"
 ModuleInterfaceTools = "1"
 StrBase = "1"
+ICU_jll = "=74.1.0"
