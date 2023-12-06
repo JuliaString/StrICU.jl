@@ -13,7 +13,7 @@ using ModuleInterfaceTools
 using ICU_jll
 
 # for now, just leave this hardcoded, until I can see how to get the version from ICU_jll
-const suffix = "_68"
+const suffix = "_74"
 const iculib = ICU_jll.libicuuc
 const iculibi18n = ICU_jll.libicui18n
 
